@@ -13,12 +13,9 @@ function init(event) {
     createScene();
     createFloor();
     createHelpers();
-    createBackground();
-    createBlob();
     createLights();
     createSpaceship();
     createDatGui();
-    // document.addEventListener('mousemove', onMouseMove, false);
     loop();
 }
 
@@ -27,7 +24,7 @@ function createSpaceship() {
     mtlLoader.setPath('e45/');
     // mtlLoader.setTexturePath('blackhawk/');
     mtlLoader.load('e45.mtl', function(materials) {
-        console.log(materials);
+        // console.log(materials);
         materials.preload();
         // materials.materials.Material_25.map.magFilter = THREE.NearestFilter;
         // materials.materials.Material_25.map.minFilter = THREE.LinearFilter;
@@ -42,25 +39,29 @@ function createSpaceship() {
             spaceship.scale.set(2,2,2);
             spaceship.position.set(0,5,15);
             spaceship.castShadow = true;
-            console.log(spaceship);
+            // console.log(spaceship);
             scene.add(spaceship);
             var tl = new TimelineMax();
             var increment = 10;
 
             // Hover animation
-            TweenMax.to(spaceship.position, 2, {y:"+="+"0.5", repeat:-1, yoyo:true, ease: Power1.easeInOut});
+            TweenMax.to(spaceship.position, 2, {y:"+="+"1", repeat:-1, yoyo:true, ease: Power1.easeInOut});
 
             window.addEventListener('keydown', function() {
                 if(event.keyCode === 65) {
                     if(spaceship.position.x === 15 || spaceship.position.x === 0) {
-                        // Transition Animationsdda
-                        tl.to(spaceship.position,0.2,{x:"-=15", ease: Power1.easeInOut})
+                        // Transition Animations
+                        tl.to(spaceship.position,0.2,{x:"-=15", ease: Power1.easeInOut});
                         tl.to(spaceship.rotation,0.1,{z:"+=0.2", ease: Power1.easeInOut},"-0.05");
+                        tl.play();
+
                     }
                 } else if (event.keyCode === 68) {
                     if(spaceship.position.x === -15 || spaceship.position.x === 0) {
                         tl.to(spaceship.position,0.2,{x:"+="+"15", ease: Power1.easeInOut});
                         tl.to(spaceship.rotation,0.1,{z:"-=0.2", ease: Power1.easeInOut},"-0.05");
+                        tl.play();
+
                     }
                 }
             });
@@ -82,8 +83,8 @@ function createFloor() {
     texture.wrapT = THREE.RepeatWrapping
     texture.repeat.set( 1, 4 );
     texture.offset.y = 1;
-    var normalmap = new THREE.TextureLoader().load("images/normal-map-512.jpg");
-    var specmap = new THREE.TextureLoader().load("images/water-map-512.jpg");
+    // var normalmap = new THREE.TextureLoader().load("images/normal-map-512.jpg");
+    // var specmap = new THREE.TextureLoader().load("images/water-map-512.jpg");
 
     planeGeometry = new THREE.BoxGeometry( PLANE_WIDTH, PLANE_LENGTH + PLANE_LENGTH / 10, 1 );
     planeMaterial = new THREE.MeshPhongMaterial();
@@ -112,12 +113,24 @@ function createFloor() {
     scene.add( planeLeft, planeRight, plane );
 }
 
+var urls = [
+    'pos-x.png',
+    'neg-x.png',
+    'pos-y.png',
+    'neg-y.png',
+    'pos-z.png',
+    'neg-z.png'
+];
+
 function createScene() {
     HEIGHT = window.innerHeight;
     WIDTH = window.innerWidth;
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xeeeeee);
+    scene.background = new THREE.CubeTextureLoader()
+            .setPath('mp_bloodvalley/')
+            .load(urls);
+    scene.fog = new THREE.Fog(0xff1111, 10, 500);
 
     aspectRatio = WIDTH / HEIGHT;
     fieldOfView = 60;
@@ -139,69 +152,16 @@ function createScene() {
 
     controls = new THREE.OrbitControls(camera);
 
-    // document.addEventListener('keydown', keyDownHandler, false);
-    // document.addEventListener('keyup', keyUpHandler, false);
-
     window.addEventListener('resize', onWindowResize, false);
 }
 
-var wPressed, aPressed, sPressed, dPressed, spacePressed;
-
-var walking, jumping;
-
-function keyDownHandler(e) {
-    // console.log(e.keyCode);
-    if (e.keyCode == 87) {
-        wPressed = true;
-    }
-    if (e.keyCode == 65) {
-        aPressed = true;
-    }
-    if (e.keyCode == 83) {
-        sPressed = true;
-    }
-    if (e.keyCode == 68) {
-        dPressed = true;
-    }
-    if (e.keyCode == 32) {
-        spacePressed = true;
-        if (!jumping) {
-            jumpAnimation();
-        }
-    }
-}
-
-function keyUpHandler(e) {
-    // console.log(e.keyCode);
-    if (e.keyCode == 87) {
-        wPressed = false;
-        walking = false;
-    }
-    if (e.keyCode == 65) {
-        aPressed = false;
-        walking = false;
-    }
-    if (e.keyCode == 83) {
-        sPressed = false;
-        walking = false;
-    }
-    if (e.keyCode == 68) {
-        dPressed = false;
-        walking = false;
-    }
-    if (e.keyCode == 32) {
-        spacePressed = false;
-        walking = false;
-        // jumping = false;
-    }
-}
 
 function createHelpers() {
     var size = 100;
     var divisions = 100;
 
     var gridHelper = new THREE.GridHelper(size, divisions);
-    scene.add(gridHelper);
+    // scene.add(gridHelper);
 
     var axisHelper = new THREE.AxisHelper(size / 2);
     scene.add(axisHelper);
@@ -220,18 +180,6 @@ function createDatGui() {
     f1.add(camera.position, 'x', -50, 50).listen();
     f1.add(camera.position, 'y', -50, 50).listen();
     f1.add(camera.position, 'z', -50, 50).listen();
-}
-
-var charObject, leftLeg, rightLeg, Legs;
-
-var ui = {
-    walkFactor: 100,
-    walkSpeed: 1,
-    turnSpeed: 3
-};
-
-function createBlob() {
-
 }
 
 function createLights() {
@@ -254,38 +202,6 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// function startWalking() {
-//     rightLeg.rotation.x = Math.cos((Date.now() / ui.walkFactor) + 90 * Math.PI / 180);
-//     leftLeg.rotation.x = Math.sin(Date.now() / ui.walkFactor);
-// }
-//
-// function stopWalking() {
-//     rightLeg.rotation.x = 0;
-//     leftLeg.rotation.x = 0;
-// }
-
-// function jumpAnimation() {
-//     if (!jumping) {
-//         jumping = true;
-//     }
-//     if (jumping) {
-//         var tl = new TimelineMax();
-//         tl.to(charObject.position, 0.4, {
-//                 y: 4,
-//                 ease: Power1.easeOut
-//             })
-//             .to(charObject.position, 0.4, {
-//                 y: 0,
-//                 ease: Power1.easeIn
-//             })
-//             .call(stopJump)
-//             .play();
-//     }
-// }
-
-// function stopJump() {
-//     jumping = false;
-// }
 
 function loop() {
     if(texture.offset.y < 0) {
@@ -293,28 +209,6 @@ function loop() {
     }
     texture.offset.y -=0.01;
     // console.log(texture.offset);
-    // if (wPressed) {
-    //     charObject.translateZ(ui.walkSpeed * 0.1);
-    // }
-    // if (sPressed) {
-    //     charObject.translateZ(ui.walkSpeed * -0.1);
-    // }
-    // if (aPressed) {
-    //     charObject.rotateY(ui.turnSpeed * Math.PI / 180);
-    // }
-    // if (dPressed) {
-    //     charObject.rotateY(-ui.turnSpeed * Math.PI / 180);
-    // }
-    //
-    // if (wPressed || sPressed || aPressed || dPressed) {
-    //     walking = true;
-    // }
-    //
-    // if (walking) {
-    //     startWalking();
-    // } else {
-    //     stopWalking();
-    // }
 
     controls.update();
     renderer.render(scene, camera);
