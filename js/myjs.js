@@ -14,12 +14,21 @@ function init(event) {
     createFloor();
     createHelpers();
     createLights();
+    textureLoaders();
     createSpaceship();
     startPowerupLogic();
     createDatGui();
     loop();
 }
 
+var cubeMaterial;
+function textureLoaders() {
+    var loader = new THREE.TextureLoader();
+
+    loader.load('images/asteroid.jpg', function(texture) {
+        cubeMaterial = new THREE.MeshLambertMaterial({map:texture});
+    })
+}
 
 function createSpaceship() {
     var mtlLoader = new THREE.MTLLoader();
@@ -47,7 +56,7 @@ function createSpaceship() {
             // spaceship.add(spaceshipMesh);
             scene.add(spaceship);
             var tl = new TimelineMax();
-            var increment = 10;
+            // var increment = 10;
 
             // Hover animation
             TweenMax.to(spaceship.position, 2, {y:"+=1", repeat:-1, yoyo:true, ease: Power1.easeInOut});
@@ -92,7 +101,7 @@ function PowerUp() {
     color: 0x29B6F6,
     	shading: THREE.FlatShading
     } );
-    object = new THREE.Mesh( objectGeometry, objectMaterial );
+    object = new THREE.Mesh( objectGeometry, cubeMaterial );
     object.position.set( xPosition, yPosition, zPosition );
     // console.log(object.position);
     object.castShadow = true;
@@ -305,13 +314,12 @@ function loop() {
         powerups[ index ].animate();
     });
 
-    // Collidson Detection
+    // Collision Detection
     if(spaceship){
         // console.log(spaceship);
         if ( detectCollisions( powerups ) === true ) {
-            console.log('Hit : '+(collisionCounter++));
+            console.log('Hit : '+(++collisionCounter));
         }
-
     }
 
     controls.update();
