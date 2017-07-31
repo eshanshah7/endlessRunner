@@ -15,9 +15,11 @@ function init(event) {
     createHelpers();
     createLights();
     createSpaceship();
+    startPowerupLogic();
     createDatGui();
     loop();
 }
+
 
 function createSpaceship() {
     var mtlLoader = new THREE.MTLLoader();
@@ -32,7 +34,8 @@ function createSpaceship() {
         var loader = new THREE.OBJLoader();
         loader.setMaterials(materials);
         loader.setPath('e45/');
-        loader.load('e45.obj', function(spaceship) {
+        loader.load('e45.obj', function(obj) {
+            spaceship = obj;
             // object.rotation.z = 90 * Math.PI / 180.0;
             // object.rotation.x = -90 * Math.PI / 180.0;
             // object.position.y = -100;
@@ -40,12 +43,14 @@ function createSpaceship() {
             spaceship.position.set(0,5,15);
             spaceship.castShadow = true;
             // console.log(spaceship);
+            // spaceshipMesh.position.set(0,6,0);
+            // spaceship.add(spaceshipMesh);
             scene.add(spaceship);
             var tl = new TimelineMax();
             var increment = 10;
 
             // Hover animation
-            TweenMax.to(spaceship.position, 2, {y:"+="+"1", repeat:-1, yoyo:true, ease: Power1.easeInOut});
+            TweenMax.to(spaceship.position, 2, {y:"+=1", repeat:-1, yoyo:true, ease: Power1.easeInOut});
 
             window.addEventListener('keydown', function() {
                 if(event.keyCode === 65) {
@@ -67,6 +72,70 @@ function createSpaceship() {
             });
         });
     });
+}
+
+function PowerUp() {
+    var object, objectDimension, objectGeometry, objectMaterial, xPosition, yPosition, zPosition, xPositionValues, yPositionValues, zPositionValues;
+
+    objectDimension = 2;
+
+    xPositionValues = [ -( PLANE_WIDTH - PADDING ) / 2, 0, ( PLANE_WIDTH - PADDING ) / 2 ];
+    yPositionValues = [ objectDimension + 4 ];
+    zPositionValues = [ -( PLANE_LENGTH - PADDING ) / 2 ];
+
+    xPosition = xPositionValues[ getRandomInteger( 0, xPositionValues.length - 1 ) ];
+    yPosition = yPositionValues[ getRandomInteger( 0, yPositionValues.length - 1 ) ];
+    zPosition = zPositionValues[ getRandomInteger( 0, zPositionValues.length - 1 ) ];
+
+    objectGeometry = new THREE.BoxGeometry( objectDimension, objectDimension, objectDimension, objectDimension );
+    objectMaterial = new THREE.MeshLambertMaterial( {
+    color: 0x29B6F6,
+    	shading: THREE.FlatShading
+    } );
+    object = new THREE.Mesh( objectGeometry, objectMaterial );
+    object.position.set( xPosition, yPosition, zPosition );
+    // console.log(object.position);
+    object.castShadow = true;
+    object.receiveShadow = true;
+
+    object.animate = function () {
+        object.rotation.y += 0.05;
+
+        if ( object.position.z < PLANE_LENGTH / 2 + PLANE_LENGTH / 10 ) {
+            object.position.z += 5;
+        } else {
+            object.position.x = xPositionValues[ getRandomInteger( 0, xPositionValues.length - 1 ) ];
+            object.position.z = -PLANE_LENGTH / 2;
+        }
+
+    }
+
+    return object;
+}
+
+var powerup = {},
+	powerups = [],
+    powerupSpawnIntervalID = {},
+    powerupCounterIntervalID = {};
+
+function startPowerupLogic () {
+  powerupSpawnIntervalID = window.setInterval( function () {
+
+    if ( powerups.length < POWERUP_COUNT ) {
+      powerup = new PowerUp();
+      powerups.push( powerup );
+      scene.add( powerup );
+    }
+
+  }, 4000 );
+
+  powerupCounterIntervalID = window.setInterval( function () {
+    POWERUP_COUNT += 1;
+  }, 30000 );
+}
+
+function getRandomInteger( min, max ) {
+  return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
 }
 
 var PLANE_WIDTH = 50,
@@ -130,7 +199,7 @@ function createScene() {
     scene.background = new THREE.CubeTextureLoader()
             .setPath('mp_bloodvalley/')
             .load(urls);
-    scene.fog = new THREE.Fog(0xff1111, 10, 500);
+    // scene.fog = new THREE.Fog(0xff1111, 10, 500);
 
     aspectRatio = WIDTH / HEIGHT;
     fieldOfView = 60;
@@ -202,6 +271,28 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+var collisionCounter = 0;
+
+function detectCollisions( objects ) {
+    // console.log(spaceshipMesh);
+    var origin = spaceship.position.clone();
+
+    var matrix = new THREE.Matrix4();
+    matrix.extractRotation( spaceship.matrix );
+
+    var direction = new THREE.Vector3( 0, 0, 1 );
+    direction = direction.applyMatrix4( matrix );
+
+    var ray = new THREE.Raycaster( origin, direction );
+    // console.log(ray);
+    var intersections = ray.intersectObjects( objects );
+
+    if ( intersections.length > 0 && intersections[0].distance <= 5) {
+            // console.log(intersections[0].distance);
+      return true;
+    }
+  return false;
+}
 
 function loop() {
     if(texture.offset.y < 0) {
@@ -209,6 +300,19 @@ function loop() {
     }
     texture.offset.y -=0.01;
     // console.log(texture.offset);
+
+    powerups.forEach( function ( element, index ) {
+        powerups[ index ].animate();
+    });
+
+    // Collidson Detection
+    if(spaceship){
+        // console.log(spaceship);
+        if ( detectCollisions( powerups ) === true ) {
+            console.log('Hit : '+(collisionCounter++));
+        }
+
+    }
 
     controls.update();
     renderer.render(scene, camera);
