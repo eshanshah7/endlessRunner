@@ -12,7 +12,7 @@ window.addEventListener('load', init, false);
 function init(event) {
     createScene();
     createFloor();
-    createHelpers();
+    // createHelpers();
     createLights();
     textureLoaders();
     createSpaceship();
@@ -48,13 +48,23 @@ function createSpaceship() {
             // object.rotation.z = 90 * Math.PI / 180.0;
             // object.rotation.x = -90 * Math.PI / 180.0;
             // object.position.y = -100;
+            spaceship.traverse(function(child) {
+                if (child instanceof THREE.Mesh) {
+                    // child.material.map = texture;
+                    child.castShadow = true;
+                }
+            });
             spaceship.scale.set(2,2,2);
             spaceship.position.set(0,5,15);
             spaceship.castShadow = true;
+
+            // var spaceshipShadow = new THREE.ShadowMesh(spaceship);
             // console.log(spaceship);
             // spaceshipMesh.position.set(0,6,0);
             // spaceship.add(spaceshipMesh);
             scene.add(spaceship);
+            // scene.add(spaceshipShadow);
+
             var tl = new TimelineMax();
             // var increment = 10;
 
@@ -65,15 +75,15 @@ function createSpaceship() {
                 if(event.keyCode === 65) {
                     if(spaceship.position.x === 15 || spaceship.position.x === 0) {
                         // Transition Animations
-                        tl.to(spaceship.position,0.2,{x:"-=15", ease: Power1.easeInOut});
-                        tl.to(spaceship.rotation,0.1,{z:"+=0.2", ease: Power1.easeInOut},"-0.05");
+                        tl.to(spaceship.position,0.15,{x:"-=15", ease: Power1.easeInOut});
+                        // tl.to(spaceship.rotation,0.1,{z:"+=0.2", ease: Power1.easeInOut},"-0.05");
                         tl.play();
 
                     }
                 } else if (event.keyCode === 68) {
                     if(spaceship.position.x === -15 || spaceship.position.x === 0) {
-                        tl.to(spaceship.position,0.2,{x:"+="+"15", ease: Power1.easeInOut});
-                        tl.to(spaceship.rotation,0.1,{z:"-=0.2", ease: Power1.easeInOut},"-0.05");
+                        tl.to(spaceship.position,0.15,{x:"+="+"15", ease: Power1.easeInOut});
+                        // tl.to(spaceship.rotation,0.1,{z:"-=0.2", ease: Power1.easeInOut},"-0.05");
                         tl.play();
 
                     }
@@ -208,7 +218,7 @@ function createScene() {
     scene.background = new THREE.CubeTextureLoader()
             .setPath('mp_bloodvalley/')
             .load(urls);
-    // scene.fog = new THREE.Fog(0xff1111, 10, 500);
+    // scene.fog = new THREE.Fog(0xff1111, 10, 1000);
 
     aspectRatio = WIDTH / HEIGHT;
     fieldOfView = 60;
@@ -224,6 +234,7 @@ function createScene() {
     });
     renderer.setSize(WIDTH, HEIGHT);
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     container = document.querySelector('#container');
     container.appendChild(renderer.domElement);
@@ -245,14 +256,15 @@ function createHelpers() {
     scene.add(axisHelper);
 }
 
-function createBackground() {
-    var planeGeometry = new THREE.PlaneGeometry(100,100);
-    var planeMaterial = new THREE.MeshBasicMaterial({color: 0xffff00, side: THREE.DoubleSide});
-    var plane = new THREE.Mesh(planeGeometry,planeMaterial);
-    plane.rotation.x = 90 * Math.PI/180;
-    plane.receiveShadow = true;
-    scene.add(plane);
-}
+// function createBackground() {
+//     var planeGeometry = new THREE.PlaneGeometry(100,100);
+//     var planeMaterial = new THREE.MeshBasicMaterial({color: 0xffff00, side: THREE.DoubleSide});
+//     var plane = new THREE.Mesh(planeGeometry,planeMaterial);
+//     plane.rotation.x = 90 * Math.PI/180;
+//     plane.receiveShadow = true;
+//     scene.add(plane);
+// }
+
 function createDatGui() {
     var f1 = gui.addFolder('Camera Position');
     f1.add(camera.position, 'x', -50, 50).listen();
@@ -261,13 +273,51 @@ function createDatGui() {
 }
 
 function createLights() {
-    directionalLight = new THREE.DirectionalLight(0xffeeee, 0.9);
-    directionalLight.position.set(150, 350, 350);
+    directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(-32, 78, 76);
     directionalLight.castShadow = true;
+
+    //Set up shadow properties for the light
+    directionalLight.shadow.mapSize.width = 4096;  // default
+    directionalLight.shadow.mapSize.height = 4096; // default
+    console.log(directionalLight);
+    directionalLight.shadow.camera.near = 10;       // default
+    directionalLight.shadow.camera.far = 400;      // default
+    directionalLight.shadow.camera.top = 300;       // default
+    directionalLight.shadow.camera.bottom = -50;
+    directionalLight.shadow.camera.left = 35;       // default
+    directionalLight.shadow.camera.right = -200;
+    // directionalLight.shadowCameraVisible = true;
+
+    var helper = new THREE.CameraHelper( directionalLight.shadow.camera );
+    // scene.add( helper );
+
+    // var spotlight = new THREE.SpotLight(0xffffff, 1, 200, 0.75, 0, 0);
+    // spotlight.position.set( 0, 10, 10 );
+    // spotlight.castShadow = true;
+
+    var f3 = gui.addFolder('Directional Light Shadow');
+    f3.add(directionalLight.shadow.camera, 'left');
+    f3.add(directionalLight.shadow.camera, 'right');
+    f3.add(directionalLight.shadow.camera, 'top');
+    f3.add(directionalLight.shadow.camera, 'bottom');
+    f3.add(directionalLight.shadow.camera, 'near');
+    f3.add(directionalLight.shadow.camera, 'far');
+
+    var f2 = gui.addFolder('DirectionalLight Position');
+    f2.add(directionalLight.position, 'x').step(1);
+    f2.add(directionalLight.position, 'y').step(1);
+    f2.add(directionalLight.position, 'z').step(1);
+
+    var f4 = gui.addFolder('DirectionalLight Rotation');
+    f4.add(directionalLight.rotation, 'x', -1, 1);
+    f4.add(directionalLight.rotation, 'y', -1, 1);
+    f4.add(directionalLight.rotation, 'z', -1, 1);
 
     ambientLight = new THREE.AmbientLight(0xdc8874, .5);
 
     scene.add(directionalLight);
+    // scene.add(spotlight);
     scene.add(ambientLight);
 }
 
