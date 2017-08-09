@@ -12,6 +12,13 @@ window.addEventListener('load', init, false);
 function init(event) {
     createScene();
     createFloor();
+    for ( var i = 0; i < 60; i += 1 ) {
+        var isEast = false;
+        if ( i > 29 ) {
+          isEast = true;
+        }
+        createMountain( i, isEast );
+    }
     // createHelpers();
     createLights();
     textureLoaders();
@@ -25,7 +32,7 @@ var cubeMaterial;
 function textureLoaders() {
     var loader = new THREE.TextureLoader();
 
-    loader.load('images/asteroid.jpg', function(texture) {
+    loader.load('images/blue-rock.jpg', function(texture) {
         cubeMaterial = new THREE.MeshLambertMaterial({map:texture});
     })
 }
@@ -113,6 +120,7 @@ function PowerUp() {
     } );
     object = new THREE.Mesh( objectGeometry, cubeMaterial );
     object.position.set( xPosition, yPosition, zPosition );
+    object.rotation.z = 45 * Math.PI/180;
     // console.log(object.position);
     object.castShadow = true;
     object.receiveShadow = true;
@@ -166,7 +174,8 @@ var planeLeft, planeLeftGeometry, planeLeftMaterial, planeRight, plane, planeGeo
 
 function createFloor() {
 
-    texture = new THREE.TextureLoader().load("images/planet-512.jpg");
+    // texture = new THREE.TextureLoader().load("images/planet-512.jpg");
+    texture = new THREE.TextureLoader().load("mountain/rock2.jpg");
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping
     texture.repeat.set( 1, 4 );
@@ -199,6 +208,79 @@ function createFloor() {
     planeRight.position.x = PLANE_WIDTH;
 
     scene.add( planeLeft, planeRight, plane );
+}
+
+var mountain = {},
+    mountains = [];
+
+function createMountain ( i, isEast ) {
+  var loader = {},
+      prototype = {},
+      object = {},
+      objectDimensionX = {},
+      objectDimensionY = {},
+      objectDimensionZ = {};
+
+  // loader = new THREE.ColladaLoader();
+
+  var mtlLoader = new THREE.MTLLoader();
+  mtlLoader.setPath('mountain/');
+  // mtlLoader.setTexturePath('blackhawk/');
+  mtlLoader.load('mountain.mtl', function(materials) {
+      // console.log(materials);
+      materials.preload();
+      // materials.materials.Material_25.map.magFilter = THREE.NearestFilter;
+      // materials.materials.Material_25.map.minFilter = THREE.LinearFilter;
+
+      var loader = new THREE.OBJLoader();
+      loader.setMaterials(materials);
+      loader.setPath('mountain/');
+      loader.load('mountain.obj', function(obj) {
+          prototype = obj;
+          prototype.visible = false;
+          createObject();
+      });
+  });
+
+
+  function createObject () {
+    object = prototype.clone();
+    objectDimensionX = Math.random() * 25;
+    objectDimensionY = Math.random() * 25;
+    objectDimensionZ = objectDimensionX;
+    object.scale.set( objectDimensionX, objectDimensionY, objectDimensionZ );
+    // object.rotation.y = 45 * Math.PI/180;
+    if ( isEast === true ) {
+      object.position.x = PLANE_WIDTH * 2
+      object.position.z = ( i * PLANE_LENGTH / 27 ) - ( 1.5 * PLANE_LENGTH );
+    } else {
+      object.position.x = -PLANE_WIDTH * 2
+      object.position.z = ( i * PLANE_LENGTH / 27 ) - ( PLANE_LENGTH / 2 );
+    }
+
+    object.visible = true;
+
+    object.animate = function () {
+
+      if ( object.position.z < PLANE_LENGTH / 2 - PLANE_LENGTH / 10 ) {
+        object.position.z += 2.75;
+      } else {
+        object.position.z = -PLANE_LENGTH / 2;
+      }
+    }
+
+    mountains.push( object );
+    scene.add( object );
+  }
+  // createObject();
+  // loader.load(
+  //   'https://s3-us-west-2.amazonaws.com/s.cdpn.io/26757/mountain.dae',
+  //   function ( collada ) {
+  //     prototype = collada.scene;
+  //     prototype.visible = false;
+  //     createObject();
+  //   } );
+
 }
 
 var urls = [
@@ -280,7 +362,7 @@ function createLights() {
     //Set up shadow properties for the light
     directionalLight.shadow.mapSize.width = 4096;  // default
     directionalLight.shadow.mapSize.height = 4096; // default
-    console.log(directionalLight);
+    // console.log(directionalLight);
     directionalLight.shadow.camera.near = 10;       // default
     directionalLight.shadow.camera.far = 400;      // default
     directionalLight.shadow.camera.top = 300;       // default
@@ -362,6 +444,10 @@ function loop() {
 
     powerups.forEach( function ( element, index ) {
         powerups[ index ].animate();
+    });
+
+    mountains.forEach( function ( element, index ) {
+        mountains[ index ].animate();
     });
 
     // Collision Detection
