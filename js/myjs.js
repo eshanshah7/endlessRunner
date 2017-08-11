@@ -7,6 +7,33 @@ var directionalLight, pointLight, hemisphereLight, ambientLight;
 //dat-gui
 var gui = new dat.GUI();
 
+var progress, progressBar;
+
+// Loading Manager
+THREE.DefaultLoadingManager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+    progress = document.createElement('div');
+    progressBar = document.createElement('div');
+    progress.id = 'progress';
+    progressBar.id = 'progressBar';
+    progress.appendChild(progressBar);
+    document.body.appendChild(progress);
+	console.log( 'Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+
+};
+
+THREE.DefaultLoadingManager.onLoad = function ( ) {
+	console.log( 'Loading Complete!');
+    document.body.removeChild(progress);
+    loop();
+};
+
+THREE.DefaultLoadingManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+
+    progressBar.style.width = (itemsLoaded / itemsTotal * 100) + '%';
+	console.log( 'Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+
+};
+
 window.addEventListener('load', init, false);
 
 function init(event) {
@@ -25,7 +52,6 @@ function init(event) {
     createSpaceship();
     startPowerupLogic();
     createDatGui();
-    loop();
 }
 
 var cubeMaterial;
@@ -202,7 +228,7 @@ function createFloor() {
     planeLeft.receiveShadow = true;
     planeLeft.rotation.x = 1.570;
     planeLeft.position.x = -PLANE_WIDTH;
-    planeLeft.position.y = 1;
+    // planeLeft.position.y = 1;
 
     planeRight = planeLeft.clone();
     planeRight.position.x = PLANE_WIDTH;
@@ -245,17 +271,19 @@ function createMountain ( i, isEast ) {
 
   function createObject () {
     object = prototype.clone();
-    objectDimensionX = Math.random() * 25;
-    objectDimensionY = Math.random() * 25;
+    objectDimensionX = 10 + Math.random() * 15;
+    objectDimensionY = 10 + Math.random() * 15;
     objectDimensionZ = objectDimensionX;
     object.scale.set( objectDimensionX, objectDimensionY, objectDimensionZ );
     // object.rotation.y = 45 * Math.PI/180;
     if ( isEast === true ) {
-      object.position.x = PLANE_WIDTH * 2
+      object.position.x = (PLANE_WIDTH + objectDimensionX) * 1.6;
       object.position.z = ( i * PLANE_LENGTH / 27 ) - ( 1.5 * PLANE_LENGTH );
+      object.rotation.y = 90 * Math.PI/180;
     } else {
-      object.position.x = -PLANE_WIDTH * 2
+      object.position.x = -(PLANE_WIDTH + objectDimensionX) * 1.6;
       object.position.z = ( i * PLANE_LENGTH / 27 ) - ( PLANE_LENGTH / 2 );
+      object.rotation.y = -90 * Math.PI/180;
     }
 
     object.visible = true;
