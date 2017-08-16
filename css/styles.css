@@ -35,6 +35,15 @@ button {
     background: #000;
     border: 2px solid #000;
 }
+
+#progress::after {
+    content: "Loading Awesome Textures and Models...";
+    position: absolute;
+    bottom: -30px;
+    left: -25%;
+    width: 150%;
+    text-align: center;
+}
 #progressBar {
     width: 200px;
     height: 20px;
