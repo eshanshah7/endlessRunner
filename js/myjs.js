@@ -11,6 +11,13 @@ var progress, progressBar;
 
 var animationFrame = {};
 
+var guiOptions = {
+    firstPerson: false
+};
+
+var firstPerson;
+
+
 // Loading Manager
 THREE.DefaultLoadingManager.onStart = function(url, itemsLoaded, itemsTotal) {
     progress = document.createElement('div');
@@ -173,10 +180,13 @@ function PowerUp() {
         if (object.position.z < PLANE_LENGTH / 2 + PLANE_LENGTH / 10) {
             object.position.z += 5;
         } else {
+            if(detectCollisions(object, powerups)){
+                console.log('Object collides');
+            }
             object.position.x = xPositionValues[getRandomInteger(0, xPositionValues.length - 1)];
             object.position.z = -PLANE_LENGTH / 2;
+            object.visible = true;
         }
-
     }
 
     return object;
@@ -414,6 +424,36 @@ function createDatGui() {
     f1.add(camera.position, 'x', -50, 50).listen();
     f1.add(camera.position, 'y', -50, 50).listen();
     f1.add(camera.position, 'z', -50, 50).listen();
+
+    var camController = gui.add(guiOptions, 'firstPerson');
+    camController.onFinishChange(function(value) {
+        if(!value) {
+            firstPerson = false;
+
+            TweenMax.to(camera.position, 0.5, {
+                x: 0,
+                y: 15,
+                z: 55,
+                ease: Power1.easeInOut
+            });
+            // camera.position.set(0, 15, 55);
+            camera.rotation.set(0, 0, 0);
+
+        } else {
+
+            TweenMax.to(camera.position, 0.5, {
+                x: spaceship.position.x,
+                y: spaceship.position.y + 2,
+                z: spaceship.position.z - 3,
+                ease: Power1.easeInOut
+            }).eventCallback("onComplete", animComplete);
+        }
+    });
+}
+
+function animComplete() {
+    firstPerson = true;
+    camera.rotation.set(0, 0, 0);
 }
 
 function createLights() {
@@ -476,12 +516,12 @@ function onWindowResize() {
 
 var collisionCounter = 0;
 
-function detectCollisions(objects) {
+function detectCollisions(objToCheck, objects) {
     // console.log(spaceshipMesh);
-    var origin = spaceship.position.clone();
+    var origin = objToCheck.position.clone();
 
     var matrix = new THREE.Matrix4();
-    matrix.extractRotation(spaceship.matrix);
+    matrix.extractRotation(objToCheck.matrix);
 
     var direction = new THREE.Vector3(0, 0, 1);
     direction = direction.applyMatrix4(matrix);
@@ -491,7 +531,7 @@ function detectCollisions(objects) {
     var intersections = ray.intersectObjects(objects);
 
     if (intersections.length > 0 && intersections[0].distance <= 5) {
-        // console.log(intersections[0].distance);
+        intersections[0].object.visible = false;
         return true;
     }
     return false;
@@ -501,6 +541,22 @@ function gameOver() {
     cancelAnimationFrame(animationFrame);
     window.clearInterval(powerupSpawnIntervalID);
     window.clearInterval(powerupCounterIntervalID);
+    var gameoverOverlay = document.querySelector('#gameover-overlay');
+    var restartButton = document.querySelector('#restart-game');
+    gameoverOverlay.style.visibility = 'visible';
+    restartButton.addEventListener('click', function(e) {
+        e.target.removeEventListener(e.type, arguments.callee);
+        gameoverOverlay.style.visibility = 'hidden';
+        POWERUP_COUNT = 10;
+        powerups.forEach( function ( element, index ) {
+            scene.remove( powerups[ index ] );
+        });
+        powerups = [];
+        collisionCounter = 0;
+        spaceship.position.set(0, 5, 15);
+        loop();
+        startPowerupLogic();
+    });
     console.log('Game over!');
 }
 
@@ -525,12 +581,25 @@ function loop() {
     // Collision Detection
     if (spaceship) {
         // console.log(spaceship);
-        if (detectCollisions(powerups) === true) {
-            // gameOver();
-            console.log('Hit : ' + (++collisionCounter));
+        if (detectCollisions(spaceship, powerups) === true) {
+            if(++collisionCounter > 2) {
+                gameOver();
+            }
+            console.log('Hit : ' + (collisionCounter));
         }
     }
 
-    controls.update();
+    if(firstPerson) {
+        controls.enabled = false;
+        camera.position.x = spaceship.position.x;
+        camera.position.y = spaceship.position.y + 2;
+        camera.position.z = spaceship.position.z - 3;
+
+    } else {
+        controls.enabled = true;
+        controls.update();
+    }
+
     renderer.render(scene, camera);
+
 }
