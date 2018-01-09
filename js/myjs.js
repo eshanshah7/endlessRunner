@@ -71,7 +71,6 @@ function init(event) {
     textureLoaders();
     createSpaceship();
     // startPowerupLogic();
-
     createDatGui();
 }
 
@@ -116,6 +115,8 @@ function createOverlays() {
             }
         }
     });
+
+    document.addEventListener('dblclick', recenterCamera);
 }
 
 function pauseGame() {
@@ -490,18 +491,8 @@ function createDatGui() {
     camController.onFinishChange(function(value) {
         if (!value) {
             firstPerson = false;
-
-            TweenMax.to(camera.position, 0.5, {
-                x: 0,
-                y: 15,
-                z: 55,
-                ease: Power1.easeInOut
-            });
-            // camera.position.set(0, 15, 55);
-            camera.rotation.set(0, 0, 0);
-
+            recenterCamera();
         } else {
-
             TweenMax.to(camera.position, 0.5, {
                 x: spaceship.position.x,
                 y: spaceship.position.y + 2,
@@ -514,6 +505,16 @@ function createDatGui() {
 
 function animComplete() {
     firstPerson = true;
+    camera.rotation.set(0, 0, 0);
+}
+
+function recenterCamera() {
+    TweenMax.to(camera.position, 0.5, {
+        x: 0,
+        y: 15,
+        z: 55,
+        ease: Power1.easeInOut
+    });
     camera.rotation.set(0, 0, 0);
 }
 
