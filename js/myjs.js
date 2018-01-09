@@ -7,6 +7,9 @@ var directionalLight, pointLight, hemisphereLight, ambientLight;
 //dat-gui
 var gui = new dat.GUI();
 
+// Scoring
+var score = 0, lives = 3;
+
 var progress, progressBar;
 
 var animationFrame = {};
@@ -16,6 +19,12 @@ var guiOptions = {
 };
 
 var firstPerson;
+
+//Game state
+var isPaused = false;
+var isGameOver = true;
+var isRunning = false;
+var scoreContainer, livesContainer, pauseContainer;
 
 
 // Loading Manager
@@ -34,6 +43,7 @@ THREE.DefaultLoadingManager.onLoad = function() {
     console.log('Loading Complete!');
     document.body.removeChild(progress);
     loop();
+    splashScreen();
 };
 
 THREE.DefaultLoadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
@@ -46,6 +56,7 @@ THREE.DefaultLoadingManager.onProgress = function(url, itemsLoaded, itemsTotal) 
 window.addEventListener('load', init, false);
 
 function init(event) {
+    createOverlays();
     createScene();
     createFloor();
     for (var i = 0; i < 60; i += 1) {
@@ -59,7 +70,8 @@ function init(event) {
     createLights();
     textureLoaders();
     createSpaceship();
-    startPowerupLogic();
+    // startPowerupLogic();
+
     createDatGui();
 }
 
@@ -73,6 +85,51 @@ function textureLoaders() {
             map: texture
         });
     })
+}
+function splashScreen() {
+    document.querySelector('#splash-container').style.opacity = '1';
+    document.querySelector('#playIcon').addEventListener('click', startGame);
+}
+
+function startGame() {
+    isGameOver = false;
+    document.querySelector('#splash-screen').style.visibility = 'hidden';
+    startPowerupLogic();
+}
+function createOverlays() {
+    // Score
+    scoreContainer = document.querySelector('#score-overlay');
+
+    // Lives
+    livesContainer = document.querySelectorAll('.lives');
+
+    // Pause Screen
+    pauseContainer = document.querySelector('#pause-screen');
+    document.addEventListener('keydown', function(e) {
+        if (!isGameOver) {
+            if (e.keyCode == 27) {
+                if (isPaused) {
+                    resumeGame();
+                } else {
+                    pauseGame();
+                }
+            }
+        }
+    });
+}
+
+function pauseGame() {
+    cancelAnimationFrame(animationFrame);
+    isRunning = false;
+    isPaused = true;
+    pauseContainer.style.visibility = 'visible';
+}
+
+function resumeGame() {
+    pauseContainer.style.visibility = 'hidden';
+    isPaused = false;
+    isRunning = true;
+    loop();
 }
 
 function createSpaceship() {
@@ -180,7 +237,7 @@ function PowerUp() {
         if (object.position.z < PLANE_LENGTH / 2 + PLANE_LENGTH / 10) {
             object.position.z += 5;
         } else {
-            if(detectCollisions(object, powerups)){
+            if (detectCollisions(object, powerups)) {
                 console.log('Object collides');
             }
             object.position.x = xPositionValues[getRandomInteger(0, xPositionValues.length - 1)];
@@ -198,6 +255,7 @@ var powerup = {},
     powerupCounterIntervalID = {};
 
 function startPowerupLogic() {
+    isRunning = true;
     powerupSpawnIntervalID = window.setInterval(function() {
 
         if (powerups.length < POWERUP_COUNT) {
@@ -346,6 +404,7 @@ var urls = [
     'neg-z.png'
 ];
 var skyBox;
+
 function createScene() {
     HEIGHT = window.innerHeight;
     WIDTH = window.innerWidth;
@@ -355,13 +414,13 @@ function createScene() {
     // Skybox
     var materialArray = [];
     for (var i = 0; i < 6; i++)
-        materialArray.push( new THREE.MeshBasicMaterial({
-            map: THREE.ImageUtils.loadTexture( 'mp_bloodvalley/' + urls[i] ),
+        materialArray.push(new THREE.MeshBasicMaterial({
+            map: THREE.ImageUtils.loadTexture('mp_bloodvalley/' + urls[i]),
             side: THREE.BackSide
-    }));
-    var skyGeometry = new THREE.CubeGeometry( 5000, 5000, 5000 );
-    var skyMaterial = new THREE.MeshFaceMaterial( materialArray );
-    skyBox = new THREE.Mesh( skyGeometry, skyMaterial );
+        }));
+    var skyGeometry = new THREE.CubeGeometry(5000, 5000, 5000);
+    var skyMaterial = new THREE.MeshFaceMaterial(materialArray);
+    skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
     skyBox.rotation.y = 3;
     skyBox.position.y = 300;
     var f5 = gui.addFolder('Sky Box Position');
@@ -393,7 +452,9 @@ function createScene() {
 
     controls = new THREE.OrbitControls(camera);
     // Dont let camera go below ground
-    controls.maxPolarAngle = Math.PI/2 - 0.1;
+    controls.maxPolarAngle = Math.PI / 2 - 0.1;
+    controls.minDistance = 50;
+    controls.maxDistance = 100;
 
     window.addEventListener('resize', onWindowResize, false);
 }
@@ -427,7 +488,7 @@ function createDatGui() {
 
     var camController = gui.add(guiOptions, 'firstPerson');
     camController.onFinishChange(function(value) {
-        if(!value) {
+        if (!value) {
             firstPerson = false;
 
             TweenMax.to(camera.position, 0.5, {
@@ -539,6 +600,7 @@ function detectCollisions(objToCheck, objects) {
 
 function gameOver() {
     cancelAnimationFrame(animationFrame);
+    isGameOver = true;
     window.clearInterval(powerupSpawnIntervalID);
     window.clearInterval(powerupCounterIntervalID);
     var gameoverOverlay = document.querySelector('#gameover-overlay');
@@ -548,12 +610,17 @@ function gameOver() {
         e.target.removeEventListener(e.type, arguments.callee);
         gameoverOverlay.style.visibility = 'hidden';
         POWERUP_COUNT = 10;
-        powerups.forEach( function ( element, index ) {
-            scene.remove( powerups[ index ] );
+        powerups.forEach(function(element, index) {
+            scene.remove(powerups[index]);
         });
         powerups = [];
         collisionCounter = 0;
+        score = 0;
         spaceship.position.set(0, 5, 15);
+        isGameOver = false;
+        for (var i = 0; i < livesContainer.length; i++) {
+            livesContainer[i].style.visibility = 'visible';
+        }
         loop();
         startPowerupLogic();
     });
@@ -582,14 +649,17 @@ function loop() {
     if (spaceship) {
         // console.log(spaceship);
         if (detectCollisions(spaceship, powerups) === true) {
-            if(++collisionCounter > 2) {
+            if(livesContainer.length > 0) {
+                livesContainer[2 - collisionCounter].style.visibility = 'hidden';
+            }
+            if (++collisionCounter > 2) {
                 gameOver();
             }
             console.log('Hit : ' + (collisionCounter));
         }
     }
 
-    if(firstPerson) {
+    if (firstPerson) {
         controls.enabled = false;
         camera.position.x = spaceship.position.x;
         camera.position.y = spaceship.position.y + 2;
@@ -599,6 +669,12 @@ function loop() {
         controls.enabled = true;
         controls.update();
     }
+
+    // Scoring
+    if(isRunning) {
+        score += 10;
+    }
+    scoreContainer.innerHTML = score;
 
     renderer.render(scene, camera);
 

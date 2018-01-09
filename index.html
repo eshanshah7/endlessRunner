@@ -10,8 +10,24 @@
 
 <body>
     <div id="container"></div>
-    <div id="info">Use <em>A</em> and <em>D</em> keys to move spacechip left and right.<br>Use mouse drag and wheel to pan and zoom.</div>
-    <div id="score-overlay"></div>
+    <div id="info">Use <em>A</em> and <em>D</em> keys to move spacechip left and right.<br>Use mouse drag and wheel to pan and zoom.<br>Press ESC to Pause/Unpause.</div>
+    <div id="splash-screen">
+        <div id="splash-container">
+            <img id="titleLogo" src="images/titleLogo.png"></img>
+            <img id="playIcon" src="images/playIcon.png"></img>
+        </div>
+    </div>
+    <div id="score-overlay">0</div>
+    <div id="lives-overlay">
+        <img class="lives" src="images/livesIcon.png"></img>
+        <img class="lives" src="images/livesIcon.png"></img>
+        <img class="lives" src="images/livesIcon.png"></img>
+    </div>
+    <div id="pause-screen">
+        <img id="titleLogo" src="images/titleLogo.png"></img>
+        <h1>Paused</h1>
+        <h3>Press ESC to unpause</h3>
+    </div>
     <div id="gameover-overlay">
         <button id="restart-game">Restart Game</button>
     </div>
