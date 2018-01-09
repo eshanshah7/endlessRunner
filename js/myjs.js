@@ -626,10 +626,16 @@ function gameOver() {
     window.clearInterval(powerupCounterIntervalID);
     var gameoverOverlay = document.querySelector('#gameover-overlay');
     var restartButton = document.querySelector('#replayIcon');
+    var gameOverScore = document.querySelector('#gameOverScore');
+    var scoreOverlay = document.querySelector('#score-overlay');
+    scoreOverlay.style.visibility = 'hidden';
+
+    gameOverScore.innerHTML = score;
     gameoverOverlay.style.visibility = 'visible';
     restartButton.addEventListener('click', function(e) {
         e.target.removeEventListener(e.type, arguments.callee);
         gameoverOverlay.style.visibility = 'hidden';
+        scoreOverlay.style.visibility = 'visible';
         POWERUP_COUNT = 10;
         powerups.forEach(function(element, index) {
             scene.remove(powerups[index]);

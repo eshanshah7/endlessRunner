@@ -66,15 +66,20 @@ button {
     position: absolute;
     top: 20px;
     left: 20px;
-    font-size: 40px;
-    font-weight: 600;
-    color: #9F2B2B;
     z-index: 2;
+}
+
+.score {
+    font-size: 50px;
+    font-weight: 700;
+    color: #9F2B2B;
+    color: linear-gradient(top, rgba(137,47,42,1) 0%, rgba(203,48,48,1) 100%);
+    -webkit-text-stroke: 1px black;
 }
 
 #lives-overlay {
     position: absolute;
-    top: 70px;
+    top: 80px;
     left: 20px;
     z-index: 2;
 }
@@ -141,4 +146,10 @@ img {
     left: 0;
     right: 0;
     margin: 0 auto;
+}
+
+#gameOverScore {
+    position: relative;
+    top: 25%;
+    text-align: center;
 }
