@@ -69,12 +69,14 @@ button {
     font-size: 40px;
     font-weight: 600;
     color: #9F2B2B;
+    z-index: 2;
 }
 
 #lives-overlay {
     position: absolute;
     top: 70px;
     left: 20px;
+    z-index: 2;
 }
 
 #pause-screen {
@@ -119,14 +121,14 @@ img {
     width: 40px;
 }
 
-#titleLogo {
+#titleLogo, #gameOverLogo {
     position: relative;
     width: 60%;
     top: 20%;
     margin: 0 auto;
 }
 
-#playIcon {
+#playIcon, #replayIcon {
     position: relative;
     width: 20%;
     top: 60%;

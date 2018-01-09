@@ -6,9 +6,11 @@ var directionalLight, pointLight, hemisphereLight, ambientLight;
 
 //dat-gui
 var gui = new dat.GUI();
+gui.closed = true;
 
 // Scoring
-var score = 0, lives = 3;
+var score = 0,
+    lives = 3;
 
 var progress, progressBar;
 
@@ -85,6 +87,7 @@ function textureLoaders() {
         });
     })
 }
+
 function splashScreen() {
     document.querySelector('#splash-container').style.opacity = '1';
     document.querySelector('#playIcon').addEventListener('click', startGame);
@@ -95,6 +98,7 @@ function startGame() {
     document.querySelector('#splash-screen').style.visibility = 'hidden';
     startPowerupLogic();
 }
+
 function createOverlays() {
     // Score
     scoreContainer = document.querySelector('#score-overlay');
@@ -131,6 +135,22 @@ function resumeGame() {
     isPaused = false;
     isRunning = true;
     loop();
+}
+
+function cameraShake(objectToShake) {
+    TweenMax.fromTo(objectToShake.position, 0.2, {x: objectToShake.position.x -1},
+        {
+            x: objectToShake.position.x,
+            ease: RoughEase.ease.config({
+                template: Power0.easeNone,
+                strength: 10,
+                points: 20,
+                taper: "none",
+                randomize: true,
+                clamp: false
+            })
+        }
+    );
 }
 
 function createSpaceship() {
@@ -605,7 +625,7 @@ function gameOver() {
     window.clearInterval(powerupSpawnIntervalID);
     window.clearInterval(powerupCounterIntervalID);
     var gameoverOverlay = document.querySelector('#gameover-overlay');
-    var restartButton = document.querySelector('#restart-game');
+    var restartButton = document.querySelector('#replayIcon');
     gameoverOverlay.style.visibility = 'visible';
     restartButton.addEventListener('click', function(e) {
         e.target.removeEventListener(e.type, arguments.callee);
@@ -650,7 +670,12 @@ function loop() {
     if (spaceship) {
         // console.log(spaceship);
         if (detectCollisions(spaceship, powerups) === true) {
-            if(livesContainer.length > 0) {
+            if (firstPerson) {
+                cameraShake(spaceship);
+            } else {
+                cameraShake(camera);
+            }
+            if (livesContainer.length > 0) {
                 livesContainer[2 - collisionCounter].style.visibility = 'hidden';
             }
             if (++collisionCounter > 2) {
@@ -672,7 +697,7 @@ function loop() {
     }
 
     // Scoring
-    if(isRunning) {
+    if (isRunning) {
         score += 10;
     }
     scoreContainer.innerHTML = score;
