@@ -28,6 +28,20 @@
         <h1>Paused</h1>
         <h3>Press ESC to unpause</h3>
     </div>
+    <div id="settingsIconContainer">
+        <img id="settingsIcon" class="settings" src="images/settingsIcon.png"></img>
+    </div>
+
+    <div id="settings-overlay">
+        <ul>
+            <li>First Person Mode</li>
+            <li><label class="switch">
+                <input id="firstPersonbox" type="checkbox">
+                <span class="slider round"></span>
+            </label></li>
+        </ul>
+    </div>
+
     <div id="gameover-overlay">
         <img id="gameOverLogo" src="images/gameOver.png"></img>
         <div id="gameOverScore" class="score"></div>
@@ -39,7 +53,7 @@
     <script src="js/three.js"></script>
     <script src="js/OrbitControls.js"></script>
     <script src="js/dat.gui.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/1.19.1/TweenMax.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.1/TweenMax.min.js"></script>
     <script src="js/MTLLoader.js"></script>
     <script src="js/OBJLoader.js"></script>
     <script src="js/ColladaLoader.js"></script>

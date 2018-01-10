@@ -5,12 +5,19 @@ var scene, camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
 var directionalLight, pointLight, hemisphereLight, ambientLight;
 
 //dat-gui
-var gui = new dat.GUI();
-gui.closed = true;
+// var gui = new dat.GUI();
+// gui.closed = true;
 
 // Scoring
 var score = 0,
     lives = 3;
+
+// Settings
+var settings = {
+    firstPerson: false
+};
+
+var isSettingsVisible = false;
 
 var progress, progressBar;
 
@@ -26,7 +33,7 @@ var firstPerson;
 var isPaused = false;
 var isGameOver = true;
 var isRunning = false;
-var scoreContainer, livesContainer, pauseContainer;
+var scoreContainer, livesContainer, pauseContainer, settingsIconContainer, settingsOverlay;
 
 
 // Loading Manager
@@ -74,6 +81,7 @@ function init(event) {
     createSpaceship();
     // startPowerupLogic();
     createDatGui();
+    createSettings();
 }
 
 var cubeMaterial;
@@ -86,6 +94,23 @@ function textureLoaders() {
             map: texture
         });
     })
+}
+
+function createSettings() {
+    // document.querySelector('#settingsIcon').addEventListener('click', toggleSettings);
+}
+
+function toggleSettings() {
+    console.log('clicked');
+    var settingsOverlay = document.querySelector('#settings-overlay');
+    if(isSettingsVisible) {
+        settingsOverlay.style.visibility = 'hidden';
+        isSettingsVisible = false;
+    }
+    else {
+        settingsOverlay.style.visibility = 'visible';
+        isSettingsVisible = true;
+    }
 }
 
 function splashScreen() {
@@ -108,6 +133,9 @@ function createOverlays() {
 
     // Pause Screen
     pauseContainer = document.querySelector('#pause-screen');
+    settingsIconContainer = document.querySelector('#settingsIconContainer');
+    settingsOverlay = document.querySelector('#settings-overlay');
+
     document.addEventListener('keydown', function(e) {
         if (!isGameOver) {
             if (e.keyCode == 27) {
@@ -120,7 +148,23 @@ function createOverlays() {
         }
     });
 
+    document.querySelector('#firstPersonbox').addEventListener('change', firstPersonToggle);
+
     document.addEventListener('dblclick', recenterCamera);
+}
+
+function firstPersonToggle(e) {
+    if (!e.path[0].checked) {
+        firstPerson = false;
+        recenterCamera();
+    } else {
+        TweenMax.to(camera.position, 0.5, {
+            x: spaceship.position.x,
+            y: spaceship.position.y + 2,
+            z: spaceship.position.z - 3,
+            ease: Power1.easeInOut
+        }).eventCallback("onComplete", animComplete);
+    }
 }
 
 function pauseGame() {
@@ -128,9 +172,13 @@ function pauseGame() {
     isRunning = false;
     isPaused = true;
     pauseContainer.style.visibility = 'visible';
+    settingsIconContainer.style.visibility = 'visible';
+    settingsOverlay.style.visibility = 'visible';
 }
 
 function resumeGame() {
+    settingsOverlay.style.visibility = 'hidden';
+    settingsIconContainer.style.visibility = 'hidden';
     pauseContainer.style.visibility = 'hidden';
     isPaused = false;
     isRunning = true;
@@ -444,9 +492,9 @@ function createScene() {
     skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
     skyBox.rotation.y = 3;
     skyBox.position.y = 300;
-    var f5 = gui.addFolder('Sky Box Position');
-    f5.add(skyBox.rotation, 'y');
-    f5.add(skyBox.position, 'y');
+    // var f5 = gui.addFolder('Sky Box Position');
+    // f5.add(skyBox.rotation, 'y');
+    // f5.add(skyBox.position, 'y');
     scene.add(skyBox);
     // scene.background = new THREE.CubeTextureLoader()
     //     .setPath('mp_bloodvalley/')
@@ -502,26 +550,28 @@ function createHelpers() {
 // }
 
 function createDatGui() {
-    var f1 = gui.addFolder('Camera Position');
-    f1.add(camera.position, 'x', -50, 50).listen();
-    f1.add(camera.position, 'y', -50, 50).listen();
-    f1.add(camera.position, 'z', -50, 50).listen();
+    // var f1 = gui.addFolder('Camera Position');
+    // f1.add(camera.position, 'x', -50, 50).listen();
+    // f1.add(camera.position, 'y', -50, 50).listen();
+    // f1.add(camera.position, 'z', -50, 50).listen();
 
-    var camController = gui.add(guiOptions, 'firstPerson');
-    camController.onFinishChange(function(value) {
-        if (!value) {
-            firstPerson = false;
-            recenterCamera();
-        } else {
-            TweenMax.to(camera.position, 0.5, {
-                x: spaceship.position.x,
-                y: spaceship.position.y + 2,
-                z: spaceship.position.z - 3,
-                ease: Power1.easeInOut
-            }).eventCallback("onComplete", animComplete);
-        }
-    });
+    // var camController = gui.add(guiOptions, 'firstPerson');
+    // camController.onFinishChange(function(value) {
+    //     if (!value) {
+    //         firstPerson = false;
+    //         recenterCamera();
+    //     } else {
+    //         TweenMax.to(camera.position, 0.5, {
+    //             x: spaceship.position.x,
+    //             y: spaceship.position.y + 2,
+    //             z: spaceship.position.z - 3,
+    //             ease: Power1.easeInOut
+    //         }).eventCallback("onComplete", animComplete);
+    //     }
+    // });
 }
+
+
 
 function animComplete() {
     firstPerson = true;
@@ -562,23 +612,23 @@ function createLights() {
     // spotlight.position.set( 0, 10, 10 );
     // spotlight.castShadow = true;
 
-    var f3 = gui.addFolder('Directional Light Shadow');
-    f3.add(directionalLight.shadow.camera, 'left');
-    f3.add(directionalLight.shadow.camera, 'right');
-    f3.add(directionalLight.shadow.camera, 'top');
-    f3.add(directionalLight.shadow.camera, 'bottom');
-    f3.add(directionalLight.shadow.camera, 'near');
-    f3.add(directionalLight.shadow.camera, 'far');
-
-    var f2 = gui.addFolder('DirectionalLight Position');
-    f2.add(directionalLight.position, 'x').step(1);
-    f2.add(directionalLight.position, 'y').step(1);
-    f2.add(directionalLight.position, 'z').step(1);
-
-    var f4 = gui.addFolder('DirectionalLight Rotation');
-    f4.add(directionalLight.rotation, 'x', -1, 1);
-    f4.add(directionalLight.rotation, 'y', -1, 1);
-    f4.add(directionalLight.rotation, 'z', -1, 1);
+    // var f3 = gui.addFolder('Directional Light Shadow');
+    // f3.add(directionalLight.shadow.camera, 'left');
+    // f3.add(directionalLight.shadow.camera, 'right');
+    // f3.add(directionalLight.shadow.camera, 'top');
+    // f3.add(directionalLight.shadow.camera, 'bottom');
+    // f3.add(directionalLight.shadow.camera, 'near');
+    // f3.add(directionalLight.shadow.camera, 'far');
+    //
+    // var f2 = gui.addFolder('DirectionalLight Position');
+    // f2.add(directionalLight.position, 'x').step(1);
+    // f2.add(directionalLight.position, 'y').step(1);
+    // f2.add(directionalLight.position, 'z').step(1);
+    //
+    // var f4 = gui.addFolder('DirectionalLight Rotation');
+    // f4.add(directionalLight.rotation, 'x', -1, 1);
+    // f4.add(directionalLight.rotation, 'y', -1, 1);
+    // f4.add(directionalLight.rotation, 'z', -1, 1);
 
     ambientLight = new THREE.AmbientLight(0xdc8874, .5);
 
@@ -630,7 +680,7 @@ function gameOver() {
     var scoreOverlay = document.querySelector('#score-overlay');
     scoreOverlay.style.visibility = 'hidden';
 
-    gameOverScore.innerHTML = score;
+    gameOverScore.innerHTML = `Score : ${score}`;
     gameoverOverlay.style.visibility = 'visible';
     restartButton.addEventListener('click', function(e) {
         e.target.removeEventListener(e.type, arguments.callee);
