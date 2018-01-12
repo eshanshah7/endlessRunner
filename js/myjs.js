@@ -747,7 +747,7 @@ function updateName() {
             e.target.focus();
         }
         if(e.target == document.querySelector('.nameButton')) {
-            updateScore();
+            // updateScore();
             nameModal.style.display = 'none';
         }
     }
@@ -795,7 +795,10 @@ function gameOver() {
 }
 
 function loop() {
-    animationFrame = requestAnimationFrame(loop);
+    setTimeout(function() {
+        animationFrame = requestAnimationFrame(loop);
+    },1000/60);
+
 
     if (texture.offset.y < 0) {
         texture.offset.y = 1;
