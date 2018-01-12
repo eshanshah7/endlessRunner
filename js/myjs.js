@@ -798,7 +798,7 @@ function gameOver() {
 function loop() {
     limitFPS = setTimeout(function() {
         animationFrame = requestAnimationFrame(loop);
-    },1000/60);
+    },17);
 
 
     if (texture.offset.y < 0) {
