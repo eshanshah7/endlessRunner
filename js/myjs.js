@@ -756,6 +756,7 @@ function updateName() {
 }
 
 function gameOver() {
+    clearTimeout(limitFPS);
     cancelAnimationFrame(animationFrame);
     window.removeEventListener('keydown', moveSpaceship);
     updateName();
