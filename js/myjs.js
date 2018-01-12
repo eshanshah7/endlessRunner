@@ -679,8 +679,6 @@ function detectCollisions(objToCheck, objects) {
     return false;
 }
 
-new slimScroll(highScoresContainer);
-
 function highScores() {
     if(typeof(Storage)!=="undefined"){
         var scores = false;
