@@ -4,6 +4,7 @@ var scene, camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH,
 // Light variables
 var directionalLight, pointLight, hemisphereLight, ambientLight;
 
+var limitFPS;
 //dat-gui
 // var gui = new dat.GUI();
 // gui.closed = true;
@@ -173,6 +174,7 @@ function firstPersonToggle(e) {
 
 function pauseGame() {
     cancelAnimationFrame(animationFrame);
+    clearTimeout(limitFPS);
     window.removeEventListener('keydown', moveSpaceship);
     isRunning = false;
     isPaused = true;
@@ -795,7 +797,7 @@ function gameOver() {
 }
 
 function loop() {
-    setTimeout(function() {
+    limitFPS = setTimeout(function() {
         animationFrame = requestAnimationFrame(loop);
     },1000/60);
 
