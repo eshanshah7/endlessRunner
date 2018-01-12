@@ -45,9 +45,19 @@
     <div id="gameover-overlay">
         <img id="gameOverLogo" src="images/gameOver.png"></img>
         <div id="gameOverScore" class="score"></div>
-        <img id="replayIcon" src="images/replayIcon.png"></img>
+        <div id="high-scores-container">
+            <h1>Leaderboards</h1>
+            <div id="high-scores"></div>
+        </div>
+        <img id="replayIcon" class="hover-shadow" src="images/replayIcon.png"></img>
     </div>
-    <a href="https://github.com/eshanshah7/endlessRunner" target="_blank"><button type="button">View on Github</button></a>
+    <div id="nameModal">
+        <div class="modal-content">
+            <input type="text" name="highScoreName" class="nameInput" placeholder="Enter Name for Highscore" maxlength="20"/><br/>
+            <button id="submitName" class="nameButton">Submit</button>
+        </div>
+    </div>
+    <a href="https://github.com/eshanshah7/endlessRunner" target="_blank"><button class="githubButton" type="button">View on Github</button></a>
 
 
     <script src="js/three.js"></script>

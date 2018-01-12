@@ -10,6 +10,7 @@ var directionalLight, pointLight, hemisphereLight, ambientLight;
 
 // Scoring
 var score = 0,
+    high_scores = {},
     lives = 3;
 
 // Settings
@@ -33,7 +34,7 @@ var firstPerson;
 var isPaused = false;
 var isGameOver = true;
 var isRunning = false;
-var scoreContainer, livesContainer, pauseContainer, settingsIconContainer, settingsOverlay;
+var scoreContainer, livesContainer, pauseContainer, settingsIconContainer, settingsOverlay, highScoresContainer;
 
 
 // Loading Manager
@@ -44,7 +45,7 @@ THREE.DefaultLoadingManager.onStart = function(url, itemsLoaded, itemsTotal) {
     progressBar.id = 'progressBar';
     progress.appendChild(progressBar);
     document.body.appendChild(progress);
-    console.log('Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+    // console.log('Started loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
 
 };
 
@@ -58,7 +59,7 @@ THREE.DefaultLoadingManager.onLoad = function() {
 THREE.DefaultLoadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
 
     progressBar.style.width = (itemsLoaded / itemsTotal * 100) + '%';
-    console.log('Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+    // console.log('Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
 
 };
 
@@ -101,7 +102,6 @@ function createSettings() {
 }
 
 function toggleSettings() {
-    console.log('clicked');
     var settingsOverlay = document.querySelector('#settings-overlay');
     if(isSettingsVisible) {
         settingsOverlay.style.visibility = 'hidden';
@@ -127,6 +127,7 @@ function startGame() {
 function createOverlays() {
     // Score
     scoreContainer = document.querySelector('#score-overlay');
+    highScoresContainer = document.querySelector('#high-scores');
 
     // Lives
     livesContainer = document.querySelectorAll('.lives');
@@ -144,6 +145,9 @@ function createOverlays() {
                 } else {
                     pauseGame();
                 }
+            }
+            else {
+                e.stopPropogation();
             }
         }
     });
@@ -169,6 +173,7 @@ function firstPersonToggle(e) {
 
 function pauseGame() {
     cancelAnimationFrame(animationFrame);
+    window.removeEventListener('keydown', moveSpaceship);
     isRunning = false;
     isPaused = true;
     pauseContainer.style.visibility = 'visible';
@@ -182,6 +187,7 @@ function resumeGame() {
     pauseContainer.style.visibility = 'hidden';
     isPaused = false;
     isRunning = true;
+    window.addEventListener('keydown', moveSpaceship);
     loop();
 }
 
@@ -203,7 +209,7 @@ function cameraShake(objectToShake) {
 
 function createSpaceship() {
     var mtlLoader = new THREE.MTLLoader();
-    mtlLoader.setPath('e45/');
+    mtlLoader.setPath('assets/e45/');
     // mtlLoader.setTexturePath('blackhawk/');
     mtlLoader.load('e45.mtl', function(materials) {
         // console.log(materials);
@@ -213,7 +219,7 @@ function createSpaceship() {
 
         var loader = new THREE.OBJLoader();
         loader.setMaterials(materials);
-        loader.setPath('e45/');
+        loader.setPath('assets/e45/');
         loader.load('e45.obj', function(obj) {
             spaceship = obj;
             // object.rotation.z = 90 * Math.PI / 180.0;
@@ -236,9 +242,6 @@ function createSpaceship() {
             scene.add(spaceship);
             // scene.add(spaceshipShadow);
 
-            var tl = new TimelineMax();
-            // var increment = 10;
-
             // Hover animation
             TweenMax.to(spaceship.position, 2, {
                 y: "+=1",
@@ -247,32 +250,37 @@ function createSpaceship() {
                 ease: Power1.easeInOut
             });
 
-            window.addEventListener('keydown', function() {
-                if (event.keyCode === 65) {
-                    if (spaceship.position.x === 15 || spaceship.position.x === 0) {
-                        // Transition Animations
-                        tl.to(spaceship.position, 0.15, {
-                            x: "-=15",
-                            ease: Power1.easeInOut
-                        });
-                        // tl.to(spaceship.rotation,0.1,{z:"+=0.2", ease: Power1.easeInOut},"-0.05");
-                        tl.play();
-
-                    }
-                } else if (event.keyCode === 68) {
-                    if (spaceship.position.x === -15 || spaceship.position.x === 0) {
-                        tl.to(spaceship.position, 0.15, {
-                            x: "+=" + "15",
-                            ease: Power1.easeInOut
-                        });
-                        // tl.to(spaceship.rotation,0.1,{z:"-=0.2", ease: Power1.easeInOut},"-0.05");
-                        tl.play();
-
-                    }
-                }
-            });
+            window.addEventListener('keydown', moveSpaceship);
         });
     });
+}
+
+function moveSpaceship(e) {
+    console.log(e);
+    var tl = new TimelineMax();
+    // var increment = 10;
+    if (e.keyCode === 65) {
+        if (spaceship.position.x === 15 || spaceship.position.x === 0) {
+            // Transition Animations
+            tl.to(spaceship.position, 0.15, {
+                x: "-=15",
+                ease: Power1.easeInOut
+            });
+            // tl.to(spaceship.rotation,0.1,{z:"+=0.2", ease: Power1.easeInOut},"-0.05");
+            tl.play();
+
+        }
+    } else if (e.keyCode === 68) {
+        if (spaceship.position.x === -15 || spaceship.position.x === 0) {
+            tl.to(spaceship.position, 0.15, {
+                x: "+=" + "15",
+                ease: Power1.easeInOut
+            });
+            // tl.to(spaceship.rotation,0.1,{z:"-=0.2", ease: Power1.easeInOut},"-0.05");
+            tl.play();
+
+        }
+    }
 }
 
 function PowerUp() {
@@ -354,7 +362,7 @@ var planeLeft, planeLeftGeometry, planeLeftMaterial, planeRight, plane, planeGeo
 function createFloor() {
 
     // texture = new THREE.TextureLoader().load("images/planet-512.jpg");
-    texture = new THREE.TextureLoader().load("mountain/rock2.jpg");
+    texture = new THREE.TextureLoader().load("assets/mountain/rock2.jpg");
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping
     texture.repeat.set(1, 4);
@@ -403,7 +411,7 @@ function createMountain(i, isEast) {
     // loader = new THREE.ColladaLoader();
 
     var mtlLoader = new THREE.MTLLoader();
-    mtlLoader.setPath('mountain/');
+    mtlLoader.setPath('assets/mountain/');
     // mtlLoader.setTexturePath('blackhawk/');
     mtlLoader.load('mountain.mtl', function(materials) {
         // console.log(materials);
@@ -413,7 +421,7 @@ function createMountain(i, isEast) {
 
         var loader = new THREE.OBJLoader();
         loader.setMaterials(materials);
-        loader.setPath('mountain/');
+        loader.setPath('assets/mountain/');
         loader.load('mountain.obj', function(obj) {
             prototype = obj;
             prototype.visible = false;
@@ -484,7 +492,7 @@ function createScene() {
     var materialArray = [];
     for (var i = 0; i < 6; i++)
         materialArray.push(new THREE.MeshBasicMaterial({
-            map: THREE.ImageUtils.loadTexture('mp_bloodvalley/' + urls[i]),
+            map: THREE.ImageUtils.loadTexture('assets/mp_bloodvalley/' + urls[i]),
             side: THREE.BackSide
         }));
     var skyGeometry = new THREE.CubeGeometry(5000, 5000, 5000);
@@ -669,8 +677,85 @@ function detectCollisions(objToCheck, objects) {
     return false;
 }
 
+function highScores() {
+    if(typeof(Storage)!=="undefined"){
+        var scores = false;
+        if(localStorage["high-scores"]) {
+            highScoresContainer.style.visibility = 'visible';
+            highScoresContainer.innerHTML = '';
+            scores = JSON.parse(localStorage["high-scores"]);
+            scores = scores.sort(function(a,b){return parseInt(b)-parseInt(a)});
+            var orderedList = highScoresContainer.appendChild(document.createElement('ol'))
+            for(var i = 0; i < 10; i++){
+                var s = scores[i];
+                var fragment = document.createElement('li');
+                fragment.innerHTML = (typeof(s) != "undefined" ? s : "" );
+                orderedList.appendChild(fragment);
+            }
+        }
+    } else {
+        highScoresContainer.style.visibility = 'hidden';
+    }
+}
+
+function updateScore() {
+    if(typeof(Storage)!=="undefined"){
+        var current = parseInt(score);
+        console.log(current);
+        var scores = false;
+        if(localStorage["high-scores"]) {
+
+            scores = JSON.parse(localStorage["high-scores"]);
+            scores = scores.sort(function(a,b){return parseInt(b)-parseInt(a)});
+
+            for(var i = 0; i < 10; i++){
+                var s = parseInt(scores[i]);
+
+                var val = (!isNaN(s) ? s : 0 );
+                if(current > val)
+                {
+                    val = current;
+                    scores.splice(i, 0, parseInt(current));
+                    break;
+                }
+            }
+
+            scores.length = 10;
+            localStorage["high-scores"] = JSON.stringify(scores);
+
+        } else {
+            var scores = new Array();
+            scores[0] = current;
+            localStorage["high-scores"] = JSON.stringify(scores);
+        }
+
+        highScores();
+    }
+}
+
+function updateName() {
+    var nameModal = document.querySelector('#nameModal');
+    nameModal.style.display = 'block';
+    document.querySelector('.nameInput').focus();
+    window.onclick = function(e) {
+        if(e.target == nameModal) {
+            nameModal.style.display = 'none';
+        }
+        if(e.target == document.querySelector('.nameInput')) {
+            e.target.focus();
+        }
+        if(e.target == document.querySelector('.nameButton')) {
+            updateScore();
+            nameModal.style.display = 'none';
+        }
+    }
+}
+
 function gameOver() {
     cancelAnimationFrame(animationFrame);
+    window.removeEventListener('keydown', moveSpaceship);
+    updateName();
+    updateScore();
     isGameOver = true;
     window.clearInterval(powerupSpawnIntervalID);
     window.clearInterval(powerupCounterIntervalID);
@@ -682,10 +767,13 @@ function gameOver() {
 
     gameOverScore.innerHTML = `Score : ${score}`;
     gameoverOverlay.style.visibility = 'visible';
+
     restartButton.addEventListener('click', function(e) {
         e.target.removeEventListener(e.type, arguments.callee);
         gameoverOverlay.style.visibility = 'hidden';
         scoreOverlay.style.visibility = 'visible';
+        highScoresContainer.style.visibility = 'hidden';
+        window.addEventListener('keydown', moveSpaceship);
         POWERUP_COUNT = 10;
         powerups.forEach(function(element, index) {
             scene.remove(powerups[index]);
@@ -701,7 +789,7 @@ function gameOver() {
         loop();
         startPowerupLogic();
     });
-    console.log('Game over!');
+    // console.log('Game over!');
 }
 
 function loop() {
@@ -737,7 +825,7 @@ function loop() {
             if (++collisionCounter > 2) {
                 gameOver();
             }
-            console.log('Hit : ' + (collisionCounter));
+            // console.log('Hit : ' + (collisionCounter));
         }
     }
 
