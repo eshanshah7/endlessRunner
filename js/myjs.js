@@ -173,8 +173,8 @@ function firstPersonToggle(e) {
 }
 
 function pauseGame() {
-    cancelAnimationFrame(animationFrame);
     clearTimeout(limitFPS);
+    cancelAnimationFrame(animationFrame);
     window.removeEventListener('keydown', moveSpaceship);
     isRunning = false;
     isPaused = true;
