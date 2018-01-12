@@ -10,7 +10,10 @@ var directionalLight, pointLight, hemisphereLight, ambientLight;
 
 // Scoring
 var score = 0,
-    high_scores = {},
+    high_scores = {
+        currentScore: 0,
+        playerName : ''
+    },
     lives = 3;
 
 // Settings
@@ -145,9 +148,6 @@ function createOverlays() {
                 } else {
                     pauseGame();
                 }
-            }
-            else {
-                e.stopPropogation();
             }
         }
     });
@@ -676,6 +676,8 @@ function detectCollisions(objToCheck, objects) {
     }
     return false;
 }
+
+new slimScroll(highScoresContainer);
 
 function highScores() {
     if(typeof(Storage)!=="undefined"){
