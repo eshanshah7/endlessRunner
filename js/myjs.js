@@ -93,8 +93,8 @@ function init(event) {
     textureLoaders();
     createSpaceship();
     // startPowerupLogic();
-    createDatGui();
-    createSettings();
+    // createDatGui();
+    // createSettings();
 }
 
 var cubeMaterial;
@@ -110,7 +110,7 @@ function textureLoaders() {
 }
 
 function createSettings() {
-    // document.querySelector('#settingsIcon').addEventListener('click', toggleSettings);
+    document.querySelector('#settingsIcon').addEventListener('click', toggleSettings);
 }
 
 function toggleSettings() {
@@ -871,10 +871,13 @@ function gameOver() {
 }
 
 function loop() {
-    limitFPS = setTimeout(function() {
+    if(isMobile) {
         animationFrame = requestAnimationFrame(loop);
-    }, 15);
-
+    } else {
+        limitFPS = setTimeout(function() {
+            animationFrame = requestAnimationFrame(loop);
+        }, 15);
+    }
 
     if (texture.offset.y < 0) {
         texture.offset.y = 1;
