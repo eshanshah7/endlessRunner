@@ -1,3 +1,8 @@
+/* TODO:
+    Optimize for mobile - add touchevnts
+    Implement tutorial
+*/
+
 // Scene variables
 var scene, camera, fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH, renderer, container, controls, spaceship;
 
@@ -11,7 +16,6 @@ var limitFPS;
 
 // Scoring
 var score = 0,
-    high_scores = [],
     lives = 3;
 
 // Settings
@@ -255,7 +259,7 @@ function createSpaceship() {
 }
 
 function moveSpaceship(e) {
-    console.log(e);
+    // console.log(e);
     var tl = new TimelineMax();
     // var increment = 10;
     if (e.keyCode === 65) {
