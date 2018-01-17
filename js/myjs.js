@@ -42,6 +42,13 @@ var isRunning = false;
 var scoreContainer, livesContainer, pauseContainer, settingsIconContainer, settingsOverlay, highScoresContainer;
 
 
+// is Mobile
+var isMobile = false;
+if (/Mobi/.test(navigator.userAgent)) {
+    isMobile = true;
+    console.log('isMobile');
+}
+
 // Loading Manager
 THREE.DefaultLoadingManager.onStart = function(url, itemsLoaded, itemsTotal) {
     progress = document.createElement('div');
@@ -108,11 +115,10 @@ function createSettings() {
 
 function toggleSettings() {
     var settingsOverlay = document.querySelector('#settings-overlay');
-    if(isSettingsVisible) {
+    if (isSettingsVisible) {
         settingsOverlay.style.visibility = 'hidden';
         isSettingsVisible = false;
-    }
-    else {
+    } else {
         settingsOverlay.style.visibility = 'visible';
         isSettingsVisible = true;
     }
@@ -195,19 +201,19 @@ function resumeGame() {
 }
 
 function cameraShake(objectToShake) {
-    TweenMax.fromTo(objectToShake.position, 0.2, {x: objectToShake.position.x -1},
-        {
-            x: objectToShake.position.x,
-            ease: RoughEase.ease.config({
-                template: Power0.easeNone,
-                strength: 10,
-                points: 20,
-                taper: "none",
-                randomize: true,
-                clamp: false
-            })
-        }
-    );
+    TweenMax.fromTo(objectToShake.position, 0.2, {
+        x: objectToShake.position.x - 1
+    }, {
+        x: objectToShake.position.x,
+        ease: RoughEase.ease.config({
+            template: Power0.easeNone,
+            strength: 10,
+            points: 20,
+            taper: "none",
+            randomize: true,
+            clamp: false
+        })
+    });
 }
 
 function createSpaceship() {
@@ -253,16 +259,20 @@ function createSpaceship() {
                 ease: Power1.easeInOut
             });
 
-            window.addEventListener('keydown', moveSpaceship);
+            if (isMobile) {
+                window.addEventListener('touchstart', moveSpaceship);
+            } else {
+                window.addEventListener('keydown', moveSpaceship);
+            }
         });
     });
 }
 
 function moveSpaceship(e) {
-    // console.log(e);
+    console.log(e);
     var tl = new TimelineMax();
     // var increment = 10;
-    if (e.keyCode === 65) {
+    if (e.keyCode === 65 || e.touches[0].pageX < WIDTH / 2) {
         if (spaceship.position.x === 15 || spaceship.position.x === 0) {
             // Transition Animations
             tl.to(spaceship.position, 0.15, {
@@ -273,7 +283,7 @@ function moveSpaceship(e) {
             tl.play();
 
         }
-    } else if (e.keyCode === 68) {
+    } else if (e.keyCode === 68 || e.touches[0].pageX > WIDTH / 2) {
         if (spaceship.position.x === -15 || spaceship.position.x === 0) {
             tl.to(spaceship.position, 0.15, {
                 x: "+=" + "15",
@@ -681,18 +691,20 @@ function detectCollisions(objToCheck, objects) {
 }
 
 function highScores() {
-    if(typeof(Storage)!=="undefined"){
+    if (typeof(Storage) !== "undefined") {
         var scores = false;
-        if(localStorage["high-scores"]) {
+        if (localStorage["high-scores"]) {
             highScoresContainer.style.visibility = 'visible';
             highScoresContainer.innerHTML = '';
             scores = JSON.parse(localStorage["high-scores"]);
-            scores = scores.sort(function(a,b){return parseInt(b.score)-parseInt(a.score)});
+            scores = scores.sort(function(a, b) {
+                return parseInt(b.score) - parseInt(a.score)
+            });
             var orderedList = highScoresContainer.appendChild(document.createElement('ol'))
-            for(var i = 0; i < 10; i++){
+            for (var i = 0; i < 10; i++) {
                 var s = scores[i].score;
                 var n = scores[i].name;
-                if(s) {
+                if (s) {
                     var fragment = document.createElement('li');
                     var scoreFragment = document.createElement('span');
                     var nameFragment = document.createElement('span');
@@ -712,29 +724,30 @@ function highScores() {
 }
 
 function updateScore(currentName) {
-    if(typeof(Storage)!=="undefined"){
+    if (typeof(Storage) !== "undefined") {
         var current = parseInt(score);
         console.log(current);
         var scores = false;
-        if(localStorage["high-scores"]) {
+        if (localStorage["high-scores"]) {
 
             scores = JSON.parse(localStorage["high-scores"]);
 
             console.log(scores);
 
-            scores = scores.sort(function(a,b){return parseInt(b.score)-parseInt(a.score)});
+            scores = scores.sort(function(a, b) {
+                return parseInt(b.score) - parseInt(a.score)
+            });
 
             var currScoreObj = {
                 score: current,
                 name: currentName
             };
 
-            for(var i = 0; i < 10; i++){
+            for (var i = 0; i < 10; i++) {
                 var s = parseInt(scores[i].score);
 
-                var val = (!isNaN(s) ? s : 0 );
-                if(current > val)
-                {
+                var val = (!isNaN(s) ? s : 0);
+                if (current > val) {
                     val = current;
                     scores.splice(i, 0, currScoreObj);
                     break;
@@ -765,7 +778,7 @@ function createScoreArray(arr) {
         score: null,
         name: null
     };
-    for(var i = 0; i < 10; i++) {
+    for (var i = 0; i < 10; i++) {
         arr.push(obj)
     }
 }
@@ -777,15 +790,15 @@ function updateName() {
     nameModal.style.display = 'block';
     document.querySelector('.nameInput').focus();
     window.onclick = function(e) {
-        if(e.target == nameModal) {
+        if (e.target == nameModal) {
             nameModal.style.display = 'none';
             updateScore('Tiny Rick!'); // No name default
         }
-        if(e.target == nameModalInput) {
+        if (e.target == nameModalInput) {
             e.target.focus();
         }
-        if(e.target == nameModalButton) {
-            if(nameModalInput.value) {
+        if (e.target == nameModalButton) {
+            if (nameModalInput.value) {
                 console.log(nameModalInput.value + ' ' + score);
                 updateScore(nameModalInput.value);
                 nameModalInput.value = '';
@@ -803,9 +816,9 @@ function gameOver() {
     clearTimeout(limitFPS);
     cancelAnimationFrame(animationFrame);
     window.removeEventListener('keydown', moveSpaceship);
+    highScores();
     updateName();
     // updateScore();
-    isGameOver = true;
     window.clearInterval(powerupSpawnIntervalID);
     window.clearInterval(powerupCounterIntervalID);
     var gameoverOverlay = document.querySelector('#gameover-overlay');
@@ -845,7 +858,7 @@ function gameOver() {
 function loop() {
     limitFPS = setTimeout(function() {
         animationFrame = requestAnimationFrame(loop);
-    },15);
+    }, 15);
 
 
     if (texture.offset.y < 0) {
@@ -888,6 +901,8 @@ function loop() {
         camera.position.y = spaceship.position.y + 2;
         camera.position.z = spaceship.position.z - 3;
 
+    } else if (isMobile) {
+        controls.enabled = false;
     } else {
         controls.enabled = true;
         controls.update();
