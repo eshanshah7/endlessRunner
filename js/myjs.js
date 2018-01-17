@@ -178,6 +178,7 @@ function createOverlays() {
 }
 
 function firstPersonToggle(e) {
+    console.log(e);
     if (!e.path[0].checked) {
         firstPerson = false;
         recenterCamera();
