@@ -179,16 +179,16 @@ function createOverlays() {
 
 function firstPersonToggle(e) {
     console.log(e);
-    if (!e.path[0].checked || !e.target.checked) {
-        firstPerson = false;
-        recenterCamera();
-    } else {
+    if (e.target.checked) {
         TweenMax.to(camera.position, 0.5, {
             x: spaceship.position.x,
             y: spaceship.position.y + 2,
             z: spaceship.position.z - 3,
             ease: Power1.easeInOut
         }).eventCallback("onComplete", animComplete);
+    } else {
+        firstPerson = false;
+        recenterCamera();
     }
 }
 
