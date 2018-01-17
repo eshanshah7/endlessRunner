@@ -10,6 +10,7 @@ html {
 }
 
 body {
+    position: relative;
     margin: 0;
     canvas {
         width: 100%;
@@ -23,6 +24,8 @@ body {
     right: 20px;
     width: 150px;
     height: 30px;
+    background: #e7e7e7;
+    border-radius: 15px;
 }
 
 #info {
@@ -91,6 +94,8 @@ body {
     margin: 20px 0;
     width: 150px;
     height: 30px;
+    background: #e7e7e7;
+    border-radius: 15px;
 }
 
 .nameInput {
@@ -143,6 +148,8 @@ body {
     padding: 10px 0 20px 0;
     overflow-y: auto;
 }
+
+
 
 #high-scores {
     position: relative;
@@ -426,4 +433,57 @@ ul {
 ul li {
     float: left;
     margin: 0 20px;
+}
+
+#leftScreen, #rightScreen {
+    display: none;
+}
+
+@media only screen and (max-width: 760px) {
+    #info {
+        display: none;
+    }
+    #high-scores-container {
+        width: 90%;
+    }
+    #titleLogo, #gameOverLogo {
+            width: 80vw;
+    }
+    #titleLogo {
+        top: 20vh;
+    }
+    #lives-overlay {
+        top: 30px;
+        left: unset;
+        right: 20px;
+        z-index: 2;
+    }
+
+    #leftScreen, #rightScreen {
+        display: inline-block;
+        position: absolute;
+        top: 0;
+        width: 50%;
+        height: 100%;
+        background: transparent;
+    }
+    #rightScreen {
+        right: 0;
+    }
+    .modal-content {
+        width: 80vw;
+    }
+    .nameInput {
+        font-size: 20px;
+        width: 100%;
+    }
+    #high-scores li {
+        font-size: 20px;
+    }
+    .githubButton {
+        width: 100px;
+    }
+    .nameButton {
+        width: 100px;
+    }
 }

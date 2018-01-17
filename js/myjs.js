@@ -271,8 +271,10 @@ function createSpaceship() {
 function moveSpaceship(e) {
     console.log(e);
     var tl = new TimelineMax();
+    var leftScreen = document.querySelector('#leftScreen');
+    var rightScreen = document.querySelector('#rightScreen');
     // var increment = 10;
-    if (e.keyCode === 65 || e.touches[0].pageX < WIDTH / 2) {
+    if (e.keyCode === 65 || e.target == leftScreen) {
         if (spaceship.position.x === 15 || spaceship.position.x === 0) {
             // Transition Animations
             tl.to(spaceship.position, 0.15, {
@@ -283,7 +285,7 @@ function moveSpaceship(e) {
             tl.play();
 
         }
-    } else if (e.keyCode === 68 || e.touches[0].pageX > WIDTH / 2) {
+    } else if (e.keyCode === 68 || e.target == rightScreen) {
         if (spaceship.position.x === -15 || spaceship.position.x === 0) {
             tl.to(spaceship.position, 0.15, {
                 x: "+=" + "15",
@@ -528,6 +530,9 @@ function createScene() {
 
     camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
     camera.position.set(0, 15, 55);
+    if(isMobile) {
+        camera.position.set(0, 20, 75);
+    }
 
     renderer = new THREE.WebGLRenderer({
         alpha: true,
@@ -539,6 +544,7 @@ function createScene() {
 
     container = document.querySelector('#container');
     container.appendChild(renderer.domElement);
+
 
     controls = new THREE.OrbitControls(camera);
     // Dont let camera go below ground
@@ -600,12 +606,21 @@ function animComplete() {
 }
 
 function recenterCamera() {
-    TweenMax.to(camera.position, 0.5, {
-        x: 0,
-        y: 15,
-        z: 55,
-        ease: Power1.easeInOut
-    });
+    if(isMobile) {
+        TweenMax.to(camera.position, 0.5, {
+            x: 0,
+            y: 20,
+            z: 75,
+            ease: Power1.easeInOut
+        });
+    } else {
+        TweenMax.to(camera.position, 0.5, {
+            x: 0,
+            y: 15,
+            z: 55,
+            ease: Power1.easeInOut
+        });
+    }
     camera.rotation.set(0, 0, 0);
 }
 
