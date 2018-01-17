@@ -269,7 +269,7 @@ function createSpaceship() {
 }
 
 function moveSpaceship(e) {
-    console.log(e);
+    // console.log(e);
     var tl = new TimelineMax();
     var leftScreen = document.querySelector('#leftScreen');
     var rightScreen = document.querySelector('#rightScreen');
