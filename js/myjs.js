@@ -871,13 +871,10 @@ function gameOver() {
 }
 
 function loop() {
-    if(isMobile) {
+    limitFPS = setTimeout(function() {
         animationFrame = requestAnimationFrame(loop);
-    } else {
-        limitFPS = setTimeout(function() {
-            animationFrame = requestAnimationFrame(loop);
-        }, 15);
-    }
+    }, 15);
+
 
     if (texture.offset.y < 0) {
         texture.offset.y = 1;
