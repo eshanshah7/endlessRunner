@@ -41,6 +41,9 @@ var isGameOver = true;
 var isRunning = false;
 var scoreContainer, livesContainer, pauseContainer, settingsIconContainer, settingsOverlay, highScoresContainer;
 
+// Clock
+// var clock = new THREE.Clock();
+
 
 // is Mobile
 var isMobile = false;
@@ -109,21 +112,6 @@ function textureLoaders() {
     })
 }
 
-function createSettings() {
-    document.querySelector('#settingsIcon').addEventListener('click', toggleSettings);
-}
-
-function toggleSettings() {
-    var settingsOverlay = document.querySelector('#settings-overlay');
-    if (isSettingsVisible) {
-        settingsOverlay.style.visibility = 'hidden';
-        isSettingsVisible = false;
-    } else {
-        settingsOverlay.style.visibility = 'visible';
-        isSettingsVisible = true;
-    }
-}
-
 function splashScreen() {
     document.querySelector('#splash-container').style.opacity = '1';
     document.querySelector('#playIcon').addEventListener('click', startGame);
@@ -160,17 +148,17 @@ function createOverlays() {
         }
     });
 
-    if (isMobile) {
-        document.querySelector('#settingsIcon').addEventListener('click', function(e) {
-            if (!isGameOver) {
-                if (isPaused) {
-                    resumeGame();
-                } else {
-                    pauseGame();
-                }
+
+    document.querySelector('#settingsIcon').addEventListener('click', function(e) {
+        if (!isGameOver) {
+            if (isPaused) {
+                resumeGame();
+            } else {
+                pauseGame();
             }
-        });
-    }
+        }
+    });
+
 
     document.querySelector('#firstPersonbox').addEventListener('change', firstPersonToggle);
 
@@ -204,7 +192,7 @@ function pauseGame() {
 
 function resumeGame() {
     settingsOverlay.style.visibility = 'hidden';
-    if(!isMobile) {
+    if (!isMobile) {
         settingsIconContainer.style.visibility = 'hidden';
     }
     pauseContainer.style.visibility = 'hidden';
@@ -676,10 +664,10 @@ function detectCollisions(objToCheck, objects) {
 function highScores() {
     if (typeof(Storage) !== "undefined") {
         var scores = false;
-        if (localStorage["high-scores"]) {
+        if (localStorage["sd-high-scores"]) {
             highScoresContainer.style.visibility = 'visible';
             highScoresContainer.innerHTML = '';
-            scores = JSON.parse(localStorage["high-scores"]);
+            scores = JSON.parse(localStorage["sd-high-scores"]);
             scores = scores.sort(function(a, b) {
                 return parseInt(b.score) - parseInt(a.score)
             });
@@ -711,9 +699,9 @@ function updateScore(currentName) {
         var current = parseInt(score);
         // console.log(current);
         var scores = false;
-        if (localStorage["high-scores"]) {
+        if (localStorage["sd-high-scores"]) {
 
-            scores = JSON.parse(localStorage["high-scores"]);
+            scores = JSON.parse(localStorage["sd-high-scores"]);
 
             // console.log(scores);
 
@@ -738,7 +726,7 @@ function updateScore(currentName) {
             }
 
             scores.length = 10;
-            localStorage["high-scores"] = JSON.stringify(scores);
+            localStorage["sd-high-scores"] = JSON.stringify(scores);
 
         } else {
             var scores = new Array();
@@ -749,7 +737,7 @@ function updateScore(currentName) {
             };
             scores[0] = scoreObj;
 
-            localStorage["high-scores"] = JSON.stringify(scores);
+            localStorage["sd-high-scores"] = JSON.stringify(scores);
         }
 
         highScores();
@@ -820,7 +808,7 @@ function gameOver() {
         gameoverOverlay.style.visibility = 'hidden';
         scoreOverlay.style.visibility = 'visible';
         highScoresContainer.style.visibility = 'hidden';
-        if(isMobile) {
+        if (isMobile) {
             settingsIconContainer.style.visibility = 'visible';
         }
         window.addEventListener('keydown', moveSpaceship);
@@ -842,11 +830,12 @@ function gameOver() {
     // console.log('Game over!');
 }
 
+var testscore = 0;
+
 function loop() {
     limitFPS = setTimeout(function() {
         animationFrame = requestAnimationFrame(loop);
     }, 15);
-
 
     if (texture.offset.y < 0) {
         texture.offset.y = 1;

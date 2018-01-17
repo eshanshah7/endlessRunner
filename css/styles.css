@@ -290,7 +290,8 @@ img {
 #settings-overlay {
     position: absolute;
     top: 35%;
-    width: 50%;
+    width: 80%;
+    max-width: 800px;
     height: 30%;
     left: 0;
     right: 0;
