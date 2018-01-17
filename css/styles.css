@@ -436,7 +436,15 @@ ul li {
 }
 
 #leftScreen, #rightScreen {
-    display: none;
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: transparent;
+}
+#rightScreen {
+    right: 0;
 }
 
 @media only screen and (max-width: 760px) {
@@ -458,17 +466,7 @@ ul li {
         z-index: 2;
     }
 
-    #leftScreen, #rightScreen {
-        display: inline-block;
-        position: absolute;
-        top: 0;
-        width: 50%;
-        height: 100%;
-        background: transparent;
-    }
-    #rightScreen {
-        right: 0;
-    }
+
     .modal-content {
         width: 80vw;
     }

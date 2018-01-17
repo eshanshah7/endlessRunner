@@ -178,7 +178,6 @@ function createOverlays() {
 }
 
 function firstPersonToggle(e) {
-    console.log(e);
     if (e.target.checked) {
         TweenMax.to(camera.position, 0.5, {
             x: spaceship.position.x,
@@ -264,11 +263,11 @@ function createSpaceship() {
                 ease: Power1.easeInOut
             });
 
-            if (isMobile) {
-                window.addEventListener('touchstart', moveSpaceship);
-            } else {
-                window.addEventListener('keydown', moveSpaceship);
-            }
+
+            window.addEventListener('touchstart', moveSpaceship);
+
+            window.addEventListener('keydown', moveSpaceship);
+
         });
     });
 }
