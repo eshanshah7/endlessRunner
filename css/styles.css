@@ -454,8 +454,7 @@ ul li {
     }
     #lives-overlay {
         top: 30px;
-        left: unset;
-        right: 20px;
+        left: 20px;
         z-index: 2;
     }
 
@@ -485,5 +484,52 @@ ul li {
     }
     .nameButton {
         width: 100px;
+    }
+
+    #settings-overlay {
+        width: 90vw;
+    }
+
+    #settings-overlay ul {
+        padding: 0;
+        font-size: 25px;
+    }
+
+    .switch {
+        height: 26px;
+    }
+
+    .slider {
+
+    }
+
+    .slider:before {
+        height: 20px;
+        width: 20px;
+        bottom: 3px;
+    }
+
+    input:checked+.slider:before {
+        -webkit-transform: translateX(30px);
+        -ms-transform: translateX(30px);
+        transform: translateX(30px);
+    }
+
+    #score-overlay {
+        left: unset;
+        right: 20px;
+    }
+
+    .score {
+        font-size: 40px;
+        line-height: 40px;
+    }
+
+    #settingsIconContainer {
+        top: unset;
+        right: unset;
+        bottom: 20px;
+        left: 20px;
+        visibility: visible;
     }
 }

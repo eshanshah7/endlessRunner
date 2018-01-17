@@ -160,6 +160,18 @@ function createOverlays() {
         }
     });
 
+    if (isMobile) {
+        document.querySelector('#settingsIcon').addEventListener('click', function(e) {
+            if (!isGameOver) {
+                if (isPaused) {
+                    resumeGame();
+                } else {
+                    pauseGame();
+                }
+            }
+        });
+    }
+
     document.querySelector('#firstPersonbox').addEventListener('change', firstPersonToggle);
 
     document.addEventListener('dblclick', recenterCamera);
@@ -192,7 +204,9 @@ function pauseGame() {
 
 function resumeGame() {
     settingsOverlay.style.visibility = 'hidden';
-    settingsIconContainer.style.visibility = 'hidden';
+    if(!isMobile) {
+        settingsIconContainer.style.visibility = 'hidden';
+    }
     pauseContainer.style.visibility = 'hidden';
     isPaused = false;
     isRunning = true;
@@ -219,24 +233,19 @@ function cameraShake(objectToShake) {
 function createSpaceship() {
     var mtlLoader = new THREE.MTLLoader();
     mtlLoader.setPath('assets/e45/');
-    // mtlLoader.setTexturePath('blackhawk/');
+
     mtlLoader.load('e45.mtl', function(materials) {
         // console.log(materials);
         materials.preload();
-        // materials.materials.Material_25.map.magFilter = THREE.NearestFilter;
-        // materials.materials.Material_25.map.minFilter = THREE.LinearFilter;
 
         var loader = new THREE.OBJLoader();
         loader.setMaterials(materials);
         loader.setPath('assets/e45/');
         loader.load('e45.obj', function(obj) {
             spaceship = obj;
-            // object.rotation.z = 90 * Math.PI / 180.0;
-            // object.rotation.x = -90 * Math.PI / 180.0;
-            // object.position.y = -100;
+
             spaceship.traverse(function(child) {
                 if (child instanceof THREE.Mesh) {
-                    // child.material.map = texture;
                     child.castShadow = true;
                 }
             });
@@ -244,12 +253,7 @@ function createSpaceship() {
             spaceship.position.set(0, 5, 15);
             spaceship.castShadow = true;
 
-            // var spaceshipShadow = new THREE.ShadowMesh(spaceship);
-            // console.log(spaceship);
-            // spaceshipMesh.position.set(0,6,0);
-            // spaceship.add(spaceshipMesh);
             scene.add(spaceship);
-            // scene.add(spaceshipShadow);
 
             // Hover animation
             TweenMax.to(spaceship.position, 2, {
@@ -273,7 +277,7 @@ function moveSpaceship(e) {
     var tl = new TimelineMax();
     var leftScreen = document.querySelector('#leftScreen');
     var rightScreen = document.querySelector('#rightScreen');
-    // var increment = 10;
+
     if (e.keyCode === 65 || e.target == leftScreen) {
         if (spaceship.position.x === 15 || spaceship.position.x === 0) {
             // Transition Animations
@@ -281,7 +285,7 @@ function moveSpaceship(e) {
                 x: "-=15",
                 ease: Power1.easeInOut
             });
-            // tl.to(spaceship.rotation,0.1,{z:"+=0.2", ease: Power1.easeInOut},"-0.05");
+
             tl.play();
 
         }
@@ -291,7 +295,7 @@ function moveSpaceship(e) {
                 x: "+=" + "15",
                 ease: Power1.easeInOut
             });
-            // tl.to(spaceship.rotation,0.1,{z:"-=0.2", ease: Power1.easeInOut},"-0.05");
+
             tl.play();
 
         }
@@ -376,23 +380,16 @@ var planeLeft, planeLeftGeometry, planeLeftMaterial, planeRight, plane, planeGeo
 
 function createFloor() {
 
-    // texture = new THREE.TextureLoader().load("images/planet-512.jpg");
     texture = new THREE.TextureLoader().load("assets/mountain/rock2.jpg");
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping
     texture.repeat.set(1, 4);
     texture.offset.y = 1;
-    // var normalmap = new THREE.TextureLoader().load("images/normal-map-512.jpg");
-    // var specmap = new THREE.TextureLoader().load("images/water-map-512.jpg");
 
     planeGeometry = new THREE.BoxGeometry(PLANE_WIDTH, PLANE_LENGTH + PLANE_LENGTH / 10, 1);
     planeMaterial = new THREE.MeshPhongMaterial();
     planeMaterial.map = texture;
-    // planeMaterial.specularMap = specmap;
-    // planeMaterial.specular = new THREE.Color(0xff0000);
-    // planeMaterial.shininess = 1;
-    // planeMaterial.normalMap = normalmap;
-    // planeMaterial.normalScale.set(-0.3,-0.3);
+
     plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.rotation.x = 1.570;
     plane.receiveShadow = true;
@@ -404,7 +401,6 @@ function createFloor() {
     planeLeft.receiveShadow = true;
     planeLeft.rotation.x = 1.570;
     planeLeft.position.x = -PLANE_WIDTH;
-    // planeLeft.position.y = 1;
 
     planeRight = planeLeft.clone();
     planeRight.position.x = PLANE_WIDTH;
@@ -423,16 +419,13 @@ function createMountain(i, isEast) {
         objectDimensionY = {},
         objectDimensionZ = {};
 
-    // loader = new THREE.ColladaLoader();
 
     var mtlLoader = new THREE.MTLLoader();
     mtlLoader.setPath('assets/mountain/');
-    // mtlLoader.setTexturePath('blackhawk/');
+
     mtlLoader.load('mountain.mtl', function(materials) {
         // console.log(materials);
         materials.preload();
-        // materials.materials.Material_25.map.magFilter = THREE.NearestFilter;
-        // materials.materials.Material_25.map.minFilter = THREE.LinearFilter;
 
         var loader = new THREE.OBJLoader();
         loader.setMaterials(materials);
@@ -451,7 +444,7 @@ function createMountain(i, isEast) {
         objectDimensionY = 10 + Math.random() * 15;
         objectDimensionZ = objectDimensionX;
         object.scale.set(objectDimensionX, objectDimensionY, objectDimensionZ);
-        // object.rotation.y = 45 * Math.PI/180;
+
         if (isEast === true) {
             object.position.x = (PLANE_WIDTH + objectDimensionX) * 1.6;
             object.position.z = (i * PLANE_LENGTH / 27) - (1.5 * PLANE_LENGTH);
@@ -476,15 +469,6 @@ function createMountain(i, isEast) {
         mountains.push(object);
         scene.add(object);
     }
-    // createObject();
-    // loader.load(
-    //   'https://s3-us-west-2.amazonaws.com/s.cdpn.io/26757/mountain.dae',
-    //   function ( collada ) {
-    //     prototype = collada.scene;
-    //     prototype.visible = false;
-    //     createObject();
-    //   } );
-
 }
 
 var urls = [
@@ -515,14 +499,9 @@ function createScene() {
     skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
     skyBox.rotation.y = 3;
     skyBox.position.y = 300;
-    // var f5 = gui.addFolder('Sky Box Position');
-    // f5.add(skyBox.rotation, 'y');
-    // f5.add(skyBox.position, 'y');
+
     scene.add(skyBox);
-    // scene.background = new THREE.CubeTextureLoader()
-    //     .setPath('mp_bloodvalley/')
-    //     .load(urls);
-    // scene.fog = new THREE.Fog(0xff1111, 10, 1000);
+
     aspectRatio = WIDTH / HEIGHT;
     fieldOfView = 60;
     nearPlane = 1;
@@ -530,7 +509,7 @@ function createScene() {
 
     camera = new THREE.PerspectiveCamera(fieldOfView, aspectRatio, nearPlane, farPlane);
     camera.position.set(0, 15, 55);
-    if(isMobile) {
+    if (isMobile) {
         camera.position.set(0, 20, 75);
     }
 
@@ -567,38 +546,27 @@ function createHelpers() {
     scene.add(axisHelper);
 }
 
-// function createBackground() {
-//     var planeGeometry = new THREE.PlaneGeometry(100,100);
-//     var planeMaterial = new THREE.MeshBasicMaterial({color: 0xffff00, side: THREE.DoubleSide});
-//     var plane = new THREE.Mesh(planeGeometry,planeMaterial);
-//     plane.rotation.x = 90 * Math.PI/180;
-//     plane.receiveShadow = true;
-//     scene.add(plane);
+// function createDatGui() {
+//     var f1 = gui.addFolder('Camera Position');
+//     f1.add(camera.position, 'x', -50, 50).listen();
+//     f1.add(camera.position, 'y', -50, 50).listen();
+//     f1.add(camera.position, 'z', -50, 50).listen();
+//
+//     var camController = gui.add(guiOptions, 'firstPerson');
+//     camController.onFinishChange(function(value) {
+//         if (!value) {
+//             firstPerson = false;
+//             recenterCamera();
+//         } else {
+//             TweenMax.to(camera.position, 0.5, {
+//                 x: spaceship.position.x,
+//                 y: spaceship.position.y + 2,
+//                 z: spaceship.position.z - 3,
+//                 ease: Power1.easeInOut
+//             }).eventCallback("onComplete", animComplete);
+//         }
+//     });
 // }
-
-function createDatGui() {
-    // var f1 = gui.addFolder('Camera Position');
-    // f1.add(camera.position, 'x', -50, 50).listen();
-    // f1.add(camera.position, 'y', -50, 50).listen();
-    // f1.add(camera.position, 'z', -50, 50).listen();
-
-    // var camController = gui.add(guiOptions, 'firstPerson');
-    // camController.onFinishChange(function(value) {
-    //     if (!value) {
-    //         firstPerson = false;
-    //         recenterCamera();
-    //     } else {
-    //         TweenMax.to(camera.position, 0.5, {
-    //             x: spaceship.position.x,
-    //             y: spaceship.position.y + 2,
-    //             z: spaceship.position.z - 3,
-    //             ease: Power1.easeInOut
-    //         }).eventCallback("onComplete", animComplete);
-    //     }
-    // });
-}
-
-
 
 function animComplete() {
     firstPerson = true;
@@ -606,7 +574,7 @@ function animComplete() {
 }
 
 function recenterCamera() {
-    if(isMobile) {
+    if (isMobile) {
         TweenMax.to(camera.position, 0.5, {
             x: 0,
             y: 20,
@@ -842,6 +810,7 @@ function gameOver() {
     var scoreOverlay = document.querySelector('#score-overlay');
 
     scoreOverlay.style.visibility = 'hidden';
+    settingsIconContainer.style.visibility = 'hidden';
 
     gameOverScore.innerHTML = `Score : ${score}`;
     gameoverOverlay.style.visibility = 'visible';
@@ -851,6 +820,9 @@ function gameOver() {
         gameoverOverlay.style.visibility = 'hidden';
         scoreOverlay.style.visibility = 'visible';
         highScoresContainer.style.visibility = 'hidden';
+        if(isMobile) {
+            settingsIconContainer.style.visibility = 'visible';
+        }
         window.addEventListener('keydown', moveSpaceship);
         POWERUP_COUNT = 10;
         powerups.forEach(function(element, index) {
