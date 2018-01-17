@@ -137,10 +137,14 @@ body {
     color: white;
     margin: 0 auto;
     top: 16vh;
-    height: 45vh;
-    text-align: center;
+    max-height: 45vh;
     padding: 10px 0 20px 0;
     overflow-y: auto;
+}
+
+#high-scores {
+    position: relative;
+    margin: 2vw;
 }
 
 #high-scores ol {
@@ -150,6 +154,7 @@ body {
 #high-scores li {
     display: list-item;
     margin: 10px auto;
+    font-family: Turtles, Arial, sans-serif;
     font-size: 30px;
 }
 
@@ -266,6 +271,11 @@ img {
 
 .settings {
     width: 50px;
+}
+
+.hs-score {
+    position: absolute;
+    right: 0;
 }
 
 #settings-overlay {

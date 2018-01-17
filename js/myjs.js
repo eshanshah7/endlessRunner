@@ -11,10 +11,7 @@ var limitFPS;
 
 // Scoring
 var score = 0,
-    high_scores = {
-        currentScore: 0,
-        playerName : ''
-    },
+    high_scores = [],
     lives = 3;
 
 // Settings
@@ -615,7 +612,7 @@ function createLights() {
     directionalLight.shadow.camera.right = -200;
     // directionalLight.shadowCameraVisible = true;
 
-    var helper = new THREE.CameraHelper(directionalLight.shadow.camera);
+    // var helper = new THREE.CameraHelper(directionalLight.shadow.camera);
     // scene.add( helper );
 
     // var spotlight = new THREE.SpotLight(0xffffff, 1, 200, 0.75, 0, 0);
@@ -686,13 +683,23 @@ function highScores() {
             highScoresContainer.style.visibility = 'visible';
             highScoresContainer.innerHTML = '';
             scores = JSON.parse(localStorage["high-scores"]);
-            scores = scores.sort(function(a,b){return parseInt(b)-parseInt(a)});
+            scores = scores.sort(function(a,b){return parseInt(b.score)-parseInt(a.score)});
             var orderedList = highScoresContainer.appendChild(document.createElement('ol'))
             for(var i = 0; i < 10; i++){
-                var s = scores[i];
-                var fragment = document.createElement('li');
-                fragment.innerHTML = (typeof(s) != "undefined" ? s : "" );
-                orderedList.appendChild(fragment);
+                var s = scores[i].score;
+                var n = scores[i].name;
+                if(s) {
+                    var fragment = document.createElement('li');
+                    var scoreFragment = document.createElement('span');
+                    var nameFragment = document.createElement('span');
+                    nameFragment.innerHTML = `${n}`;
+                    nameFragment.classList.add('hs-name');
+                    scoreFragment.innerHTML = `${s}`;
+                    scoreFragment.classList.add('hs-score');
+                    fragment.appendChild(nameFragment);
+                    fragment.appendChild(scoreFragment);
+                    orderedList.appendChild(fragment);
+                }
             }
         }
     } else {
@@ -700,7 +707,7 @@ function highScores() {
     }
 }
 
-function updateScore() {
+function updateScore(currentName) {
     if(typeof(Storage)!=="undefined"){
         var current = parseInt(score);
         console.log(current);
@@ -708,16 +715,24 @@ function updateScore() {
         if(localStorage["high-scores"]) {
 
             scores = JSON.parse(localStorage["high-scores"]);
-            scores = scores.sort(function(a,b){return parseInt(b)-parseInt(a)});
+
+            console.log(scores);
+
+            scores = scores.sort(function(a,b){return parseInt(b.score)-parseInt(a.score)});
+
+            var currScoreObj = {
+                score: current,
+                name: currentName
+            };
 
             for(var i = 0; i < 10; i++){
-                var s = parseInt(scores[i]);
+                var s = parseInt(scores[i].score);
 
                 var val = (!isNaN(s) ? s : 0 );
                 if(current > val)
                 {
                     val = current;
-                    scores.splice(i, 0, parseInt(current));
+                    scores.splice(i, 0, currScoreObj);
                     break;
                 }
             }
@@ -727,7 +742,13 @@ function updateScore() {
 
         } else {
             var scores = new Array();
-            scores[0] = current;
+            createScoreArray(scores);
+            var scoreObj = {
+                score: current,
+                name: currentName
+            };
+            scores[0] = scoreObj;
+
             localStorage["high-scores"] = JSON.stringify(scores);
         }
 
@@ -735,30 +756,51 @@ function updateScore() {
     }
 }
 
+function createScoreArray(arr) {
+    var obj = {
+        score: null,
+        name: null
+    };
+    for(var i = 0; i < 10; i++) {
+        arr.push(obj)
+    }
+}
+
 function updateName() {
     var nameModal = document.querySelector('#nameModal');
+    var nameModalInput = document.querySelector('#highScoreName');
+    var nameModalButton = document.querySelector('.nameButton');
     nameModal.style.display = 'block';
     document.querySelector('.nameInput').focus();
     window.onclick = function(e) {
         if(e.target == nameModal) {
             nameModal.style.display = 'none';
+            updateScore('Tiny Rick!'); // No name default
         }
-        if(e.target == document.querySelector('.nameInput')) {
+        if(e.target == nameModalInput) {
             e.target.focus();
         }
-        if(e.target == document.querySelector('.nameButton')) {
-            // updateScore();
+        if(e.target == nameModalButton) {
+            if(nameModalInput.value) {
+                console.log(nameModalInput.value + ' ' + score);
+                updateScore(nameModalInput.value);
+                nameModalInput.value = '';
+            } else {
+                updateScore('Tiny Rick!'); // No name default
+            }
             nameModal.style.display = 'none';
         }
     }
 }
 
 function gameOver() {
+    isRunning = false;
+    isGameOver = true;
     clearTimeout(limitFPS);
     cancelAnimationFrame(animationFrame);
     window.removeEventListener('keydown', moveSpaceship);
     updateName();
-    updateScore();
+    // updateScore();
     isGameOver = true;
     window.clearInterval(powerupSpawnIntervalID);
     window.clearInterval(powerupCounterIntervalID);
@@ -766,6 +808,7 @@ function gameOver() {
     var restartButton = document.querySelector('#replayIcon');
     var gameOverScore = document.querySelector('#gameOverScore');
     var scoreOverlay = document.querySelector('#score-overlay');
+
     scoreOverlay.style.visibility = 'hidden';
 
     gameOverScore.innerHTML = `Score : ${score}`;
@@ -798,7 +841,7 @@ function gameOver() {
 function loop() {
     limitFPS = setTimeout(function() {
         animationFrame = requestAnimationFrame(loop);
-    },17);
+    },15);
 
 
     if (texture.offset.y < 0) {
