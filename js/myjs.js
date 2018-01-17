@@ -269,7 +269,7 @@ function createSpaceship() {
 }
 
 function moveSpaceship(e) {
-    console.log(e);
+    // console.log(e);
     var tl = new TimelineMax();
     var leftScreen = document.querySelector('#leftScreen');
     var rightScreen = document.querySelector('#rightScreen');
@@ -741,13 +741,13 @@ function highScores() {
 function updateScore(currentName) {
     if (typeof(Storage) !== "undefined") {
         var current = parseInt(score);
-        console.log(current);
+        // console.log(current);
         var scores = false;
         if (localStorage["high-scores"]) {
 
             scores = JSON.parse(localStorage["high-scores"]);
 
-            console.log(scores);
+            // console.log(scores);
 
             scores = scores.sort(function(a, b) {
                 return parseInt(b.score) - parseInt(a.score)
@@ -814,7 +814,7 @@ function updateName() {
         }
         if (e.target == nameModalButton) {
             if (nameModalInput.value) {
-                console.log(nameModalInput.value + ' ' + score);
+                // console.log(nameModalInput.value + ' ' + score);
                 updateScore(nameModalInput.value);
                 nameModalInput.value = '';
             } else {
